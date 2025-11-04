@@ -14,11 +14,11 @@ export default function CrearTrans() {
                 <Text style={styles.titulo}>NUEVA TRANSACCIÓN</Text>
                 <View>
                     <Text style={styles.subtitulos}>  Tipo de Movimiento</Text>
-                    <View style={styles.botones}
-                    <Button style={styles.botones} title={'INGRESO'}/>
-                    <Button style={styles.botones}  title={'GASTO'}/>
+                    <View style={styles.botones}>
+                    <Button style={[styles.luz, {color: esEncendido ? color:'white'}]} title={'INGRESO'}/>
+                    <Button style={[styles.luz, {color: esEncendido ? color:'white'}]}  title={'GASTO'}/>
+                    </View>
                     <Text style={styles.subtitulos}>Cantidad</Text>
-
                     <TextInput
                         style={styles.input}
                         placeholder='$Monto'
