@@ -7,14 +7,15 @@ import Comparacion from './screens/Comparacion';
 import Notificaciones from './screens/Notificaciones';
 import Presupuesto1 from './screens/Presupuesto1';
 import Presupuesto2 from './screens/Presupuesto2';
-import CalendarioComparacion from './screens/CalendarioComparaion';
+import CalendarioComparacion from './screens/CalendarioComparacion';
 import MenuLateral from './screens/MenuLateral';
+import MenuTemporal from './screens/MenuTemporal';
 // 2. Main: Zona de componentes
 export default function App() {
 
   return (
 
-    <MenuLateral/>
+    <MenuTemporal/>
 
   );
   

@@ -1,10 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, TouchableOpacity, ScrollView} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';  
 
 
 export default function MenuLateral({ navigation }) {
-const MenuLateral = ({ navigation }) => {
 
   const menuItems = [
         { name: 'Transacciones', icon: 'repeat', screen: 'Transactions' },
@@ -23,7 +22,7 @@ const navigateToDetails = (screen) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
-        <Text style={styles.title}>Menú Lateral</Text>
+        <Text style={styles.headerTitle}>Menú Lateral</Text>
 
         <View style={styles.profileCard}>
         <View style={styles.profileInfo}>
@@ -39,7 +38,7 @@ const navigateToDetails = (screen) => {
 
         <Text style={styles.sectionTitle}>Opciones de la app</Text>
 
-        // Menu de opciones
+        {/* Menu de opciones */}
         <View style={styles.optionsList}>
           {menuItems.map((item) => (
             <TouchableOpacity
@@ -52,15 +51,13 @@ const navigateToDetails = (screen) => {
             </TouchableOpacity>
           ))}
         </View>
-        //Boton cerrar sesion 
+        {/* Boton cerrar sesion */}
         <TouchableOpacity style={styles.logoutButton} onPress={handlelogout}>
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity> 
       </ScrollView>
     </SafeAreaView>
   );
-
-};
 }
 
 const styles = StyleSheet.create({
@@ -107,6 +104,11 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#333',
     },
+    profileName: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+    },
     userBalance: {
         fontSize: 20,
         fontWeight: 'bold',
@@ -129,6 +131,14 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 3,
         elevation: 2,
+    },
+    optionItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
     },
     menuItem: {
         flexDirection: 'row',
