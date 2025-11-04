@@ -1,23 +1,42 @@
-import { Text, StyleSheet, View, ImageBackground, Button, TextInput, Image} from 'react-native'
+import { Text, StyleSheet, View, ImageBackground, Button, TextInput, Image, TouchableOpacity} from 'react-native'
 import React, { useState } from 'react'
 
 export default function CrearTrans() {
   const [monto, setMonto]=useState('');
   const [categoria, setCategoria]=useState('');
   const [descripcion, setDescripcion]=useState('');
+  const [tipo, setTipo] = useState('GASTO');
 
     return (
         <ImageBackground style={styles.background} source={require('../assets/FCrear.png')}>
             <View style={styles.container}>
-                <Image source={require('../assets/L-SFon.png')} style={{width:80, height:80, marginBottom:10}}/>
-                <Text style={styles.nombre}>AHORRA + APP</Text>
-                <Text style={styles.titulo}>NUEVA TRANSACCIÓN</Text>
+                <View style={styles.nombrecontainer}>
+                    <Image source={require('../assets/L-SFon.png')} style={styles.logo}/>
+                    <Text style={styles.nombre}>AHORRA + APP</Text>
+                </View>
+                    <Text style={styles.titulo}>NUEVA TRANSACCIÓN</Text>
+                
                 <View>
                     <Text style={styles.subtitulos}>  Tipo de Movimiento</Text>
-                    <View style={styles.botones}>
-                    <Button style={[styles.luz, {color: esEncendido ? color:'white'}]} title={'INGRESO'}/>
-                    <Button style={[styles.luz, {color: esEncendido ? color:'white'}]}  title={'GASTO'}/>
+
+                   <View style={styles.botones}>
+                        <TouchableOpacity
+                            style={[ styles.tipoBtn,
+                                { backgroundColor: tipo === 'INGRESO' ? '#7bdcb5' : '#dce5e8' } ]}
+                            onPress={() => setTipo('INGRESO')}
+                        >
+                            <Text style={styles.Texto}>INGRESO</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.tipoBtn,
+                                { backgroundColor: tipo === 'GASTO' ? '#7bdcb5' : '#dce5e8' }]}
+                            onPress={() => setTipo('GASTO')}
+                        >
+                            <Text style={styles.Texto}>GASTO</Text>
+                        </TouchableOpacity>
                     </View>
+
                     <Text style={styles.subtitulos}>Cantidad</Text>
                     <TextInput
                         style={styles.input}
@@ -26,6 +45,7 @@ export default function CrearTrans() {
                         onChangeText={setMonto}
                     />
                     <Text style={styles.subtitulos}>Categoria</Text>
+                
                     <TextInput
                         style={styles.input}
                         placeholder='Escribe la categoria aqui'
@@ -39,10 +59,13 @@ export default function CrearTrans() {
                         value={descripcion}
                         onChangeText={setDescripcion}
                     />
+                    
+                    <View>
                     <Button 
                     style={styles.boton} 
                     color={'#4c79e3ce'}
                     title={'Añadir'}/>
+                    </View>
                 </View>
 
             </View>
@@ -84,6 +107,23 @@ const styles = StyleSheet.create({
         gap: 15,
 
     },
+    nombrecontainer:{
+        fontSize: 24,
+        fontWeight: 'bold',
+        fontFamily:'Italic',
+        color: '#ffffffff',
+        flexDirection: 'row',
+        marginBottom:10,
+        marginTop:20,
+        padding: 10,
+        gap:15,
+    },
+    logo:{
+        width:80, 
+        height:80, 
+        marginBottom:10,
+        flexDirection: 'row',
+    },
     subtitulos:{
         color: '#fff',
         fontFamily:'Italic',
@@ -100,9 +140,27 @@ const styles = StyleSheet.create({
     },
     boton:{
         marginTop: 10,
-        borderRadius: 25,
+        borderRadius: 30,
         overflow: 'hidden',
         gap: 10,
         flexDirection: 'row-reverse',
+    },
+    tipoBtn: {
+        flex: 1,
+        borderRadius: 8,
+        paddingVertical: 5,
+        padding: 20,
+        marginTop:8,
+        width: 120,
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    Texto: {
+        textAlign: 'center',
+        fontSize: 16, 
+        fontWeight: 'bold',
+        color: '#003d4d',
+                 
     },
 })
