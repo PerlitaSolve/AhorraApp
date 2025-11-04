@@ -36,7 +36,7 @@ export default function Notificaciones({ navigation }) {
                     <Text style={styles.backArrow}>←</Text>
                 </TouchableOpacity>
                 <Image 
-                    source={require('../assets/logo.png')} 
+                    source={require('../assets/L-SFon.png')} 
                     style={styles.logo}
                     resizeMode="contain"
                 />

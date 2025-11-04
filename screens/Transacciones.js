@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, FlatList, Button, ImageBackground, Image } from 'react-native'
+import { StyleSheet, Text, View, FlatList, Button, ImageBackground, Image, alert } from 'react-native'
 import React from 'react'
 import { Ionicons } from '@expo/vector-icons'
 
@@ -11,6 +11,14 @@ export default function Transacciones() {
         {id:'5', fecha: '01 de Septiembre', descripción: 'Pago de Netflix', monto: -220, categoria:'Servicios'},
         {id:'6', fecha: '26 de Agosto', descripción: 'Salario', monto: +7200, categoria:'Salario'},
     ]   
+    const alertaEliminar=()=>{
+        alert("¿Estás seguro de que deseas eliminar este movimiento?\n Esta acción podría ser irreversible");
+        <View>
+            <Button title="Cancelar" onPress={() => {}}/>
+            <Button title="Aceptar" onPress={() => alert("Movimiento eliminado")}/>
+        </View>
+
+    }
     const ent=({item})=>(
         <View style={styles.overlay}>
             <View style={{flex:1}}>
@@ -25,7 +33,7 @@ export default function Transacciones() {
             </View>
             <View style={styles.iconos}>
                 <Ionicons name="create-outline" size={18} color="#007aff" style={{ marginRight: 8 }} />
-                <Ionicons name="trash-outline" size={18} color="#007aff" />
+                <Ionicons name="trash-outline" size={18} color="#007aff" onPress={alertaEliminar}/>
             </View>
         </View>
     )
@@ -33,10 +41,10 @@ export default function Transacciones() {
     <ImageBackground style={styles.background} source={require('../assets/FTrans.png')}>
         <View style={styles.container}>
             <View style={styles.header}>
-                <Image source={require('../assets/L-SFon.png')} style={{width:80, height:80, marginBottom:10}}/>
+                <Image source={require('../assets/L-SFon.png')} style={styles.logo}/>
                 <Text style={styles.nombre}>AHORRA + APP</Text>
                 <Text style={styles.titulo}>"TRANSACCIONES"</Text>
-                <Button style={styles.boton} title="Añadir +" onPress={() => {}} />
+                <Button style={styles.boton} color='#4c79e3ce'title="Añadir +" onPress={() => {}} />
             </View>
             <View style={styles.listContainer}>
                 <View style={styles.overlay2}>
@@ -49,7 +57,7 @@ export default function Transacciones() {
                     </View>
                     
                     <View style={styles.botonContainer}>
-                        <Button title="Ver todo" onPress={() => {}} />
+                        <Button color='#4c79e3ce'title="Ver todo" onPress={() => {}} />
                     </View>
                 </View>
             </View>
@@ -57,7 +65,7 @@ export default function Transacciones() {
     );
 }
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
     background: {
         flex:1,
         width:'100%',
@@ -155,5 +163,11 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         gap: 10,
         flexDirection: 'row-reverse',
+    },
+    logo:{
+        width:80, 
+        height:80, 
+        marginBottom:10,
+        flexDirection: 'row',
     },
 });
