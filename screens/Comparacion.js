@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, StatusBar, ScrollView, TouchableOpacity, Image, SafeAreaView, Dimensions } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
 
-const screenWidth = Dimensions.get('window').width - 40; // chart width inside card
+const screenWidth = Dimensions.get('window').width - 40; 
 
 export default function Comparacion({ navigation }) {
   // Por defecto mostrar SEPTIEMBRE
