@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, SafetyAreaView, ScrollView } from 'react-native';
 import { BarChart} from 'react-native-chart-kit';
 
+
+export default function Comparacion(){
 const Comparacion = () => {
     const data = {
         labels: ['INGRESOS', 'GASTOS'],
@@ -35,6 +37,7 @@ const Comparacion = () => {
             </ScrollView>
         </SafeAreaView>
     );
+}
 }
 
 const styles = StyleSheet.create({

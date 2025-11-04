@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 
+
+export default function MenuLateral(){
 const MenuLateral = ({ navigation }) => {
 
     const menuItems =[
@@ -36,6 +38,7 @@ const MenuLateral = ({ navigation }) => {
            </TouchableOpacity> 
         </View>
     )
+}
 }
 
 const styles = StyleSheet.create({

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleShee, SafetyAreaViewBase, ScrollView, TouchableOpacity } from 'react-native';
 
+export default function Ingresos(){
 const Ingresos = () => {
     const ingresos = [
         {nombre: 'Trabajo', monto: '$7.200', color: '#66CDAA' },
@@ -39,6 +40,7 @@ const Ingresos = () => {
            </ScrollView>
         </SafetyAreaViewBase>
     )
+}
 }
 
 const styles = StyleSheet.create({

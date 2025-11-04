@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaViewBase, ScrollView, TouchableOpacity } from 'react-native';
 
+
+export default function Gastos(){
 const Gastos = () => {
     const categorias = [
         {nombre: ' Educación', monto: '$5.000', color : '#1E90FF'},
@@ -55,6 +57,7 @@ const Gastos = () => {
             </ScrollView>
         </SafeAreaViewBase>
     )
+}
 }
 
 const styles = StyleSheet.create({
