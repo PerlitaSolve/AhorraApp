@@ -1,183 +1,131 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, StatusBar, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, ScrollView, TouchableOpacity, Image, SafeAreaView, Dimensions } from 'react-native';
+import { BarChart } from 'react-native-chart-kit';
+
+const screenWidth = Dimensions.get('window').width - 40; // chart width inside card
 
 export default function Comparacion({ navigation }) {
-  const [mesSeleccionado, setMesSeleccionado] = useState(null);
+  // Por defecto mostrar SEPTIEMBRE
+  const [mesSeleccionado, setMesSeleccionado] = useState(9);
 
-  const meses = [
-    { id: 1, nombre: 'ENE', activo: true },
-    { id: 2, nombre: 'FEB', activo: false },
-    { id: 3, nombre: 'MAR', activo: true },
-    { id: 4, nombre: 'ABR', activo: false },
-    { id: 5, nombre: 'MAY', activo: false },
-    { id: 6, nombre: 'JUN', activo: true },
-    { id: 7, nombre: 'JUL', activo: false },
-    { id: 8, nombre: 'AGO', activo: true },
-    { id: 9, nombre: 'SEP', activo: true },
-    { id: 10, nombre: 'OCT', activo: false },
-    { id: 11, nombre: 'NOV', activo: true },
-    { id: 12, nombre: 'DIC', activo: false },
-  ];
-
-  const handleMesPress = (mesId) => {
-    setMesSeleccionado(mesId);
-    console.log('Mes seleccionado:', mesId);
-    // Aquí puedes navegar a la pantalla de comparación con el mes seleccionado
-    // navigation?.navigate('DetalleComparacion', { mes: mesId });
+  // Datos de ejemplo (reemplaza con tus datos reales)
+  const data = {
+    labels: ['INGRESOS', 'GASTOS'],
+    datasets: [
+      {
+        data: [1800, 5200],
+      },
+    ],
   };
 
+  const chartConfig = {
+    backgroundGradientFrom: '#ffffff',
+    backgroundGradientTo: '#ffffff',
+    fillShadowGradient: '#66CDAA',
+    fillShadowGradientOpacity: 1,
+    decimalPlaces: 0,
+    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    style: { borderRadius: 8 },
+  };
+
+  const mesesNombres = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor="#1D617A" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation?.goBack()} style={styles.backButton}>
-          <Text style={styles.backArrow}>←</Text>
-        </TouchableOpacity>
-        <Image 
-          source={require('../assets/logo.png')} 
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <Text style={styles.titulo}>AHORRA + APP</Text>
-        <TouchableOpacity style={styles.menuButton}>
-          <Text style={styles.menuIcon}>☰</Text>
+        <Image source={require('../assets/L-SFon.png')} style={styles.logo} />
+        <Text style={styles.headerTitle}>AHORRA + APP</Text>
+        <TouchableOpacity onPress={() => navigation?.openDrawer && navigation.openDrawer()} style={styles.hamburger}>
+          <Text style={{ color: '#fff', fontSize: 20 }}>≡</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Título de la sección */}
-      <Text style={styles.subtitulo}>"COMPARACIÓN DEL MES"</Text>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.sectionTitle}>"COMPARACIÓN DEL MES"</Text>
 
-      {/* Año */}
-      <View style={styles.añoContainer}>
-        <Text style={styles.añoTexto}>2025</Text>
-      </View>
+        {/* Card centrada con mes y gráfica */}
+        <View style={styles.card}>
+          <Text style={styles.monthLabel}>{mesesNombres[mesSeleccionado - 1]}</Text>
+          <Text style={styles.monthTitle}>SEPTIEMBRE</Text>
 
-      {/* Contenedor principal con grid de meses */}
-      <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.mesesContainer}>
-          
-          {/* Icono de calendario */}
-          <View style={styles.calendarioIconContainer}>
-            <View style={styles.calendarioIcon}>
-              <View style={styles.calendarioHeader}>
-                <View style={styles.calendarioLinea} />
-                <View style={styles.calendarioLinea} />
-                <View style={styles.calendarioLinea} />
-              </View>
-              <View style={styles.calendarioBody}>
-                <View style={styles.calendarioCuadro} />
-                <View style={styles.calendarioCuadro} />
-                <View style={styles.calendarioCuadro} />
-                <View style={styles.calendarioCuadro} />
-              </View>
+          <View style={styles.chartWrapper}>
+            <BarChart
+              data={data}
+              width={screenWidth}
+              height={220}
+              yAxisLabel="$"
+              chartConfig={chartConfig}
+              verticalLabelRotation={0}
+              fromZero
+              showBarTops={false}
+              withInnerLines={false}
+              style={{ borderRadius: 12 }}
+            />
+          </View>
+
+          <View style={styles.legendRow}>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendBox, { backgroundColor: '#66CDAA' }]} />
+              <Text style={styles.legendText}>Ingresos</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendBox, { backgroundColor: '#FF4500' }]} />
+              <Text style={styles.legendText}>Gastos</Text>
             </View>
           </View>
 
-          {/* Grid de meses */}
-          <View style={styles.gridMeses}>
-            {meses.map((mes) => (
-              <TouchableOpacity
-                key={mes.id}
-                style={[
-                  styles.mesButton,
-                  mes.activo ? styles.mesActivo : styles.mesInactivo,
-                  mesSeleccionado === mes.id && styles.mesSeleccionado
-                ]}
-                onPress={() => handleMesPress(mes.id)}
-              >
-                <Text style={[
-                  styles.mesTexto,
-                  mes.activo ? styles.mesTextoActivo : styles.mesTextoInactivo
-                ]}>
-                  {mes.nombre}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          <View style={styles.alertBox}>
+            <Text style={styles.alertText}>Este mes tus gastos superaron a tus ingresos. Considera revisar tus presupuestos para mejorar tu balance.</Text>
           </View>
         </View>
+
+        {/* Selector de meses (simple fila) */}
+        <View style={styles.monthsRow}>
+          {mesesNombres.map((m, idx) => (
+            <TouchableOpacity
+              key={m}
+              onPress={() => setMesSeleccionado(idx + 1)}
+              style={[styles.monthChip, mesSeleccionado === idx + 1 && styles.monthChipActive]}
+            >
+              <Text style={[styles.monthChipText, mesSeleccionado === idx + 1 && styles.monthChipTextActive]}>{m}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#FFF',
-},
-  simpleHeader: { 
-    padding: 12, 
-    backgroundColor: '#004A77', 
-    alignItems: 'center',
-},
-  headerText: { 
-    color: '#FFF', 
-    fontSize: 16, 
-    fontWeight: 'bold',
-},
+  safe: { flex: 1, backgroundColor: '#1D617A' },
+  header: { height: 80, backgroundColor: '#1D617A', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 },
+  logo: { width: 56, height: 56 },
+  headerTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginLeft: 12, flex: 1 },
+  hamburger: { padding: 8 },
 
-  content: { 
-    flex: 1, 
-    padding: 12,
-},
-  title: { 
-    fontSize: 20, 
-    fontWeight: 'bold', 
-    textAlign: 'center', 
-    marginBottom: 8, 
-    color: '#004A77',
-},
-  monthName: { 
-    fontSize: 16, 
-    textAlign: 'center', 
-    marginBottom: 12,
-},
+  container: { alignItems: 'center', paddingVertical: 20 },
+  sectionTitle: { color: '#E8F6F7', fontSize: 16, marginBottom: 16, textAlign: 'center' },
 
-  chartArea: { 
-    alignItems: 'center', 
-    marginBottom: 16, 
-    padding: 10, 
-    backgroundColor: '#F9F9F9', 
-    borderRadius: 8,
-},
-  chartText: { 
-    color: '#333', 
-    marginBottom: 8,
-},
+  card: { width: '90%', backgroundColor: '#fff', borderRadius: 12, padding: 16, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8, elevation: 4, marginBottom: 20 },
+  monthLabel: { color: '#004A77', fontSize: 12, fontWeight: '600' },
+  monthTitle: { color: '#004A77', fontSize: 22, fontWeight: 'bold', marginVertical: 8 },
+  chartWrapper: { marginTop: 6 },
 
-  legend: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-around', 
-    width: '100%', 
-    marginTop: 6,
-},
-  legendItem: { 
-    flexDirection: 'row', 
-    alignItems: 'center',
-},
-  colorBox: { 
-    width: 14, 
-    height: 14, 
-    borderRadius: 3, 
-    marginRight: 6, 
-},
-  legendLabel: { 
-    fontSize: 14, 
-    color: '#333',
-},
+  legendRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 12 },
+  legendItem: { flexDirection: 'row', alignItems: 'center' },
+  legendBox: { width: 12, height: 12, borderRadius: 3, marginRight: 8 },
+  legendText: { fontSize: 12, color: '#333' },
 
-  alertBox: { 
-    backgroundColor: '#FFF0F0', 
-    borderColor: '#FF4500', 
-    borderWidth: 1, 
-    padding: 12, 
-    borderRadius: 8, 
-    marginBottom: 12,
-},
-  alertText: { 
-    color: '#555', 
-    fontSize: 14,
-},
+  alertBox: { backgroundColor: '#0E8AA7', padding: 12, borderRadius: 8, marginTop: 14, width: '100%' },
+  alertText: { color: '#fff', textAlign: 'center' },
+
+  monthsRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', width: '100%' },
+  monthChip: { paddingHorizontal: 8, paddingVertical: 6, margin: 6, borderRadius: 6, backgroundColor: 'transparent' },
+  monthChipActive: { backgroundColor: '#0F9DD6' },
+  monthChipText: { color: '#E8F6F7' },
+  monthChipTextActive: { color: '#fff', fontWeight: '600' },
 });
