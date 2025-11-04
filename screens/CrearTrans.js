@@ -13,6 +13,9 @@ export default function CrearTrans() {
                 <View style={styles.nombrecontainer}>
                     <Image source={require('../assets/L-SFon.png')} style={styles.logo}/>
                     <Text style={styles.nombre}>AHORRA + APP</Text>
+                    <TouchableOpacity style={styles.menuButton}>
+                        <Text style={styles.menuIcon}>☰</Text>
+                    </TouchableOpacity>
                 </View>
                     <Text style={styles.titulo}>NUEVA TRANSACCIÓN</Text>
                 
@@ -59,7 +62,7 @@ export default function CrearTrans() {
                         value={descripcion}
                         onChangeText={setDescripcion}
                     />
-                    
+
                     <View>
                     <Button 
                     style={styles.boton} 
@@ -137,6 +140,8 @@ const styles = StyleSheet.create({
         marginBottom:10,
         backgroundColor: '#f1eeeeff',
         width: '100%',
+        alignItems: 'center',
+        alignContent: 'center', 
     },
     boton:{
         marginTop: 10,
@@ -144,6 +149,11 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         gap: 10,
         flexDirection: 'row-reverse',
+    },
+    menuIcon: {
+        fontSize: 28,
+        color: 'white',
+        fontWeight: 'bold',
     },
     tipoBtn: {
         flex: 1,

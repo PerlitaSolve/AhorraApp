@@ -36,7 +36,7 @@ export default function CalendarioComparacion({ navigation }) {
             {/* Header */}
             <View style={styles.header}>
                 <Image 
-                    source={require('../assets/logo.png')} 
+                    source={require('../assets/L-SFon.png')} 
                     style={styles.logo}
                     resizeMode="contain"
                 />
