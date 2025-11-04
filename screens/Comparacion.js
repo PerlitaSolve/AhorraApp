@@ -101,31 +101,123 @@ export default function Comparacion({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#1D617A' },
-  header: { height: 80, backgroundColor: '#1D617A', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 },
-  logo: { width: 56, height: 56 },
-  headerTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginLeft: 12, flex: 1 },
-  hamburger: { padding: 8 },
+  safe: { 
+    flex: 1, 
+    backgroundColor: '#1D617A', 
+  },
+  header: { 
+    height: 80, 
+    backgroundColor: '#1D617A', 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingHorizontal: 12,
+   },
+  logo: { 
+    width: 56, 
+    height: 56,
+  },
+  headerTitle: { 
+    color: '#fff', 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    marginLeft: 12, 
+    flex: 1,
+  },
+  hamburger: { 
+    padding: 8,
+  },
 
-  container: { alignItems: 'center', paddingVertical: 20 },
-  sectionTitle: { color: '#E8F6F7', fontSize: 16, marginBottom: 16, textAlign: 'center' },
+  container: { 
+    alignItems: 'center', 
+    paddingVertical: 20,
+  },
+  sectionTitle: { 
+    color: '#E8F6F7', 
+    fontSize: 16, 
+    marginBottom: 16, 
+    textAlign: 'center',
+  },
 
-  card: { width: '90%', backgroundColor: '#fff', borderRadius: 12, padding: 16, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8, elevation: 4, marginBottom: 20 },
-  monthLabel: { color: '#004A77', fontSize: 12, fontWeight: '600' },
-  monthTitle: { color: '#004A77', fontSize: 22, fontWeight: 'bold', marginVertical: 8 },
-  chartWrapper: { marginTop: 6 },
+  card: { 
+    width: '90%', 
+    backgroundColor: '#fff', 
+    borderRadius: 12, 
+    padding: 16, 
+    alignItems: 'center', 
+    shadowColor: '#000', 
+    shadowOpacity: 0.15, 
+    shadowRadius: 8, 
+    elevation: 4, 
+    marginBottom: 20,
+  },
+  monthLabel: { 
+    color: '#004A77', 
+    fontSize: 12, 
+    fontWeight: '600',
+  },
+  monthTitle: { 
+    color: '#004A77', 
+    fontSize: 22, 
+    fontWeight: 'bold', 
+    marginVertical: 8 },
+  chartWrapper: { 
+    marginTop: 6,
+  },
 
-  legendRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 12 },
-  legendItem: { flexDirection: 'row', alignItems: 'center' },
-  legendBox: { width: 12, height: 12, borderRadius: 3, marginRight: 8 },
-  legendText: { fontSize: 12, color: '#333' },
+  legendRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    width: '100%', 
+    marginTop: 12,
+  },
+  legendItem: { 
+    flexDirection: 'row', 
+    alignItems: 'center',
+   },
+  legendBox: { 
+    width: 12, 
+    height: 12, 
+    borderRadius: 3, 
+    marginRight: 8,
+  },
+  legendText: { 
+    fontSize: 12, 
+    color: '#333',
+  },
 
-  alertBox: { backgroundColor: '#0E8AA7', padding: 12, borderRadius: 8, marginTop: 14, width: '100%' },
-  alertText: { color: '#fff', textAlign: 'center' },
+  alertBox: { 
+    backgroundColor: '#0E8AA7', 
+    padding: 12, 
+    borderRadius: 8, 
+    marginTop: 14, 
+    width: '100%',
+  },
+  alertText: { 
+    color: '#fff', 
+    textAlign: 'center',
+  },
 
-  monthsRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', width: '100%' },
-  monthChip: { paddingHorizontal: 8, paddingVertical: 6, margin: 6, borderRadius: 6, backgroundColor: 'transparent' },
-  monthChipActive: { backgroundColor: '#0F9DD6' },
-  monthChipText: { color: '#E8F6F7' },
-  monthChipTextActive: { color: '#fff', fontWeight: '600' },
+  monthsRow: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    justifyContent: 'center', 
+    width: '100%',
+  },
+  monthChip: { 
+    paddingHorizontal: 8, 
+    paddingVertical: 6, 
+    margin: 6, 
+    borderRadius: 6, 
+    backgroundColor: 'transparent',
+  },
+  monthChipActive: { 
+    backgroundColor: '#0F9DD6',
+  },
+  monthChipText: { 
+    color: '#E8F6F7',
+  },
+  monthChipTextActive: { 
+    color: '#fff', 
+    fontWeight: '600',
+  },
 });
