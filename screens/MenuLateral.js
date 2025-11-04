@@ -1,41 +1,60 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
 
 export default function MenuLateral(props) {
   const { navigation } = props; 
 
   const menuItems = [
-    { nombre: 'Notificaciones', screen: 'Notificaciones' },
-    { nombre: 'Gastos', screen: 'Gastos' },
-    { nombre: 'Ingresos', screen: 'Ingresos' },
-    { nombre: 'Transacciones', screen: 'Transacciones' },
-    { nombre: 'Presupuesto', screen: 'Presupuesto' },
-    { nombre: 'Gráficas', screen: 'Comparacion' }, 
+    { nombre: 'Inicio', screen: 'Inicio', icon: '🏠' },
+    { nombre: 'Notificaciones', screen: 'Notificaciones', icon: '🔔' },
+    { nombre: 'Ingresos', screen: 'Ingresos', icon: '💰' },
+    { nombre: 'Gastos', screen: 'Gastos', icon: '💵' },
+    { nombre: 'Presupuesto', screen: 'Presupuesto', icon: '📊' },
+    { nombre: 'Transacciones', screen: 'Transacciones', icon: '📝' },
   ];
 
+  const handleLogout = () => {
+    // Aquí iría la lógica de cerrar sesión
+    navigation.navigate('Login');
+  };
+
   return (
-    <DrawerContentScrollView {...props}>
+    <DrawerContentScrollView {...props} style={styles.drawerContainer}>
       <View style={styles.container}>
-        <Text style={styles.title}>Menú</Text>
+        {/* Header con logo */}
+        <View style={styles.header}>
+          <Image 
+            source={require('../assets/L-SFon.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
 
-        {menuItems.map((item, idx) => (
-          <TouchableOpacity
-            key={idx}
-            onPress={() => {
-              // navega sólo si la pantalla está registrada en el navigator
-              if (navigation && typeof navigation.navigate === 'function') {
-                navigation.navigate(item.screen);
-              }
-            }}
-            style={styles.item}
-          >
-            <Text style={styles.itemText}>{item.nombre}</Text>
-          </TouchableOpacity>
-        ))}
+        {/* Lista de opciones del menú */}
+        <View style={styles.menuList}>
+          {menuItems.map((item, idx) => (
+            <TouchableOpacity
+              key={idx}
+              onPress={() => {
+                if (navigation?.navigate) {
+                  navigation.navigate(item.screen);
+                }
+              }}
+              style={styles.menuItem}
+            >
+              <Text style={styles.menuIcon}>{item.icon}</Text>
+              <Text style={styles.menuText}>{item.nombre}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-        <TouchableOpacity onPress={() => navigation.closeDrawer && navigation.closeDrawer()} style={styles.closeBtn}>
-          <Text style={styles.closeText}>Cerrar</Text>
+        {/* Botón de cerrar sesión */}
+        <TouchableOpacity 
+          style={styles.logoutButton}
+          onPress={handleLogout}
+        >
+          <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
       </View>
     </DrawerContentScrollView>
@@ -43,25 +62,54 @@ export default function MenuLateral(props) {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    padding: 16,
-},
-  title: { 
-    fontSize: 18, 
-    marginBottom: 12,
-},
-  item: { 
-    paddingVertical: 10,
-},
-  itemText: { 
-    fontSize: 16, 
-    color: '#333',
-},
-  closeBtn: { 
-    paddingVertical: 10, 
-    marginTop: 12,
-},
-  closeText: { 
-    color: '#FF4500',
-},
+  drawerContainer: {
+    flex: 1,
+    backgroundColor: '#1D617A',
+  },
+  container: {
+    flex: 1,
+    paddingVertical: 20,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 30,
+    paddingHorizontal: 20,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+  },
+  menuList: {
+    paddingHorizontal: 15,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    marginBottom: 5,
+    borderRadius: 8,
+  },
+  menuIcon: {
+    fontSize: 20,
+    marginRight: 15,
+    color: '#E8F6F7',
+  },
+  menuText: {
+    fontSize: 16,
+    color: '#E8F6F7',
+    fontWeight: '500',
+  },
+  logoutButton: {
+    marginTop: 'auto',
+    marginHorizontal: 15,
+    padding: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#E8F6F7',
+  },
+  logoutText: {
+    color: '#E8F6F7',
+    fontSize: 16,
+    textAlign: 'center',
+  },
 });
