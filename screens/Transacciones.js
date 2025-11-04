@@ -79,6 +79,22 @@ const styles = StyleSheet.create({
         color: '#000000ff',
         fontFamily:'Italic',
     },
+    montoContainer: {
+        alignItems: 'flex-end',
+    },
+    monto: {
+        fontSize: 16,
+        fontWeight: 'bold',     
+        fontFamily:'Italic',
+    },
+    categoria: {
+        fontSize: 12,
+        color: '#555555ff',
+        fontFamily:'Italic',
+    },
+    iconos: {
+        flexDirection: 'row',       
+    },
     overlay: {
     backgroundColor: 'rgba(204, 203, 203, 0.66)',
     padding: 10,
