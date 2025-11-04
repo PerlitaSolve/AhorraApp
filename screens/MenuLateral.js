@@ -1,115 +1,163 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { DrawerContentScrollView } from '@react-navigation/drawer';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, TouchableOpacity, ScrollView} from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';  
 
-export default function MenuLateral(props) {
-  const { navigation } = props; 
+
+export default function MenuLateral({ navigation }) {
+const MenuLateral = ({ navigation }) => {
 
   const menuItems = [
-    { nombre: 'Inicio', screen: 'Inicio', icon: '🏠' },
-    { nombre: 'Notificaciones', screen: 'Notificaciones', icon: '🔔' },
-    { nombre: 'Ingresos', screen: 'Ingresos', icon: '💰' },
-    { nombre: 'Gastos', screen: 'Gastos', icon: '💵' },
-    { nombre: 'Presupuesto', screen: 'Presupuesto', icon: '📊' },
-    { nombre: 'Transacciones', screen: 'Transacciones', icon: '📝' },
+        { name: 'Transacciones', icon: 'repeat', screen: 'Transactions' },
+        { name: 'Presupuesto', icon: 'currency-usd', screen: 'Budget' },
+        { name: 'Notificaciones', icon: 'bell', screen: 'Notifications' },
   ];
 
-  const handleLogout = () => {
-    // Aquí iría la lógica de cerrar sesión
-    navigation.navigate('Login');
-  };
+  const handlelogout = () => {
+    alert('Cerrando sesión...');
+};
+
+const navigateToDetails = (screen) => {
+  alert(`Navegando a ${screen}...`);
+};
 
   return (
-    <DrawerContentScrollView {...props} style={styles.drawerContainer}>
-      <View style={styles.container}>
-        {/* Header con logo */}
-        <View style={styles.header}>
-          <Image 
-            source={require('../assets/L-SFon.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>Menú Lateral</Text>
+
+        <View style={styles.profileCard}>
+        <View style={styles.profileInfo}>
+          <View style={styles.avatar}>
+            <MaterialCommunityIcons name="account" size={40} color="#357D8B"></MaterialCommunityIcons>
+          </View>
+          <View>
+            <Text style={styles.profileName}>Michael Jackson</Text> 
+            <Text style={styles.userBalance}>$ 20, 989</Text> 
+          </View>
+        </View>  
         </View>
 
-        {/* Lista de opciones del menú */}
-        <View style={styles.menuList}>
-          {menuItems.map((item, idx) => (
+        <Text style={styles.sectionTitle}>Opciones de la app</Text>
+
+        // Menu de opciones
+        <View style={styles.optionsList}>
+          {menuItems.map((item) => (
             <TouchableOpacity
-              key={idx}
-              onPress={() => {
-                if (navigation?.navigate) {
-                  navigation.navigate(item.screen);
-                }
-              }}
-              style={styles.menuItem}
-            >
-              <Text style={styles.menuIcon}>{item.icon}</Text>
-              <Text style={styles.menuText}>{item.nombre}</Text>
+            key={item.name}
+              style={styles.optionItem}
+              onPress={() => navigateToDetails(item.screen)}>
+                <MaterialCommunityIcons name={item.icon} size={24} color="#357D8B" style={styles.menuIcon} />
+                <Text style={styles.menuLabel}>{item.name}</Text>
+                <MaterialCommunityIcons name="chevron-right" size={24} color="gray"/>
             </TouchableOpacity>
           ))}
         </View>
-
-        {/* Botón de cerrar sesión */}
-        <TouchableOpacity 
-          style={styles.logoutButton}
-          onPress={handleLogout}
-        >
+        //Boton cerrar sesion 
+        <TouchableOpacity style={styles.logoutButton} onPress={handlelogout}>
           <Text style={styles.logoutText}>Cerrar sesión</Text>
-        </TouchableOpacity>
-      </View>
-    </DrawerContentScrollView>
+        </TouchableOpacity> 
+      </ScrollView>
+    </SafeAreaView>
   );
+
+};
 }
 
 const styles = StyleSheet.create({
-  drawerContainer: {
-    flex: 1,
-    backgroundColor: '#1D617A',
-  },
-  container: {
-    flex: 1,
-    paddingVertical: 20,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 30,
-    paddingHorizontal: 20,
-  },
-  logo: {
-    width: 120,
-    height: 120,
-  },
-  menuList: {
-    paddingHorizontal: 15,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    marginBottom: 5,
-    borderRadius: 8,
-  },
-  menuIcon: {
-    fontSize: 20,
-    marginRight: 15,
-    color: '#E8F6F7',
-  },
-  menuText: {
-    fontSize: 16,
-    color: '#E8F6F7',
-    fontWeight: '500',
-  },
-  logoutButton: {
-    marginTop: 'auto',
-    marginHorizontal: 15,
-    padding: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#E8F6F7',
-  },
-  logoutText: {
-    color: '#E8F6F7',
-    fontSize: 16,
-    textAlign: 'center',
-  },
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#f5f5f5',
+    },
+    container: {
+        padding: 20,
+    },
+    headerTitle: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        color: '#333',
+    },
+    
+    profileCard: {
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 20,
+        marginBottom: 30,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 2,
+    },
+    profileInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    avatar: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: '#E6F0F2',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 15,
+    },
+    userName: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+    },
+    userBalance: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#357D8B',
+        marginTop: 4,
+    },
+
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: 'gray',
+        marginBottom: 10,
+        marginTop: 10,
+    },
+    optionsList: {
+        backgroundColor: 'white',
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 2,
+    },
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+    },
+    menuIcon: {
+        marginRight: 15,
+        width: 30,
+    },
+    menuLabel: {
+        flex: 1,
+        fontSize: 16,
+        color: '#333',
+    },
+    
+    logoutButton: {
+        marginTop: 30,
+        backgroundColor: '#F44336',
+        padding: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    logoutText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
 });
