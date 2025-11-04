@@ -1,86 +1,67 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { DrawerContentScrollView } from '@react-navigation/drawer';
 
-const MenuLateral = ({ navigation }) => {
+export default function MenuLateral(props) {
+  const { navigation } = props; 
 
-    const menuItems =[
-        { nombre: 'Notificaciones',icono: 'notificaciones-outline', screen: 'Notificaciones' },
-        { nombre: 'Gastos',icono: 'arrow-up-circle-outline', screen: 'Gastos' },
-        { nombre: 'Ingresos',icono: 'arrow-down-circle-outline', screen: 'Ingresos' },
-        { nombre: 'Transacciones',icono: 'list-circle-outline', screen: 'Transacciones' },
-        { nombre: 'Presupuesto',icono: 'wallet-outline', screen: 'Presupuesto' },
-        { nombre: 'Gráficas',icono: 'bar-chart-outline', screen: 'Gráficas' },
-    ];
+  const menuItems = [
+    { nombre: 'Notificaciones', screen: 'Notificaciones' },
+    { nombre: 'Gastos', screen: 'Gastos' },
+    { nombre: 'Ingresos', screen: 'Ingresos' },
+    { nombre: 'Transacciones', screen: 'Transacciones' },
+    { nombre: 'Presupuesto', screen: 'Presupuesto' },
+    { nombre: 'Gráficas', screen: 'Comparacion' }, 
+  ];
 
-    return(
-        <View style={styles.container}>
-            <View style={styles.profileHeader}>
-            <Text style={styles.profileName}>Pedro Perez</Text>
-            <Text style={styles.profileBalance}>$ 20, 585</Text>
-            </View>
+  return (
+    <DrawerContentScrollView {...props}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Menú</Text>
 
-            <View style={styles.menuList}>
-                {menuItems.map((item) => (
-                    <TouchableOpacity 
-                    key={index} 
-                    style={styles.menuItems}
-                    onPress={() => navigation.navigate(item.screen)}
-                    >
-                        <Text style={styles.menuItemText}>{item.nombre}</Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
+        {menuItems.map((item, idx) => (
+          <TouchableOpacity
+            key={idx}
+            onPress={() => {
+              // navega sólo si la pantalla está registrada en el navigator
+              if (navigation && typeof navigation.navigate === 'function') {
+                navigation.navigate(item.screen);
+              }
+            }}
+            style={styles.item}
+          >
+            <Text style={styles.itemText}>{item.nombre}</Text>
+          </TouchableOpacity>
+        ))}
 
-           <TouchableOpacity style={styles.logoutButton}>
-            <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>
-           </TouchableOpacity> 
-        </View>
-    )
+        <TouchableOpacity onPress={() => navigation.closeDrawer && navigation.closeDrawer()} style={styles.closeBtn}>
+          <Text style={styles.closeText}>Cerrar</Text>
+        </TouchableOpacity>
+      </View>
+    </DrawerContentScrollView>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
-    profileHeader:{
-        padding: 20,
-        backgroundColor: '#004A77',
-        marginBottom: 10,
-        alignItems: 'flex-start',
-    },
-    profileName:{
-        color: '#fff',
-        fontSize: 18,
-        marginTop: 10,
-    },
-    profileBalance:{
-        color: '#B0E0E6',
-        fontSize: 24,
-        fontWeight: 'bold',
-    },
-    menulist: {
-        paddingHorizontal: 10,
-    },
-    menuItems:{
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 15,
-    },
-    menuItemText:{
-        fontSize: 16,
-        marginLeft: 10,
-        color: '#333',
-    },
-    logoutButton:{
-        position: 'absolute',
-        bottom: 30,
-        left: 20,
-        padding: 10,
-    },
-    logoutButtonText:{
-        color: '#FF4500',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-})
+  container: { 
+    padding: 16,
+},
+  title: { 
+    fontSize: 18, 
+    marginBottom: 12,
+},
+  item: { 
+    paddingVertical: 10,
+},
+  itemText: { 
+    fontSize: 16, 
+    color: '#333',
+},
+  closeBtn: { 
+    paddingVertical: 10, 
+    marginTop: 12,
+},
+  closeText: { 
+    color: '#FF4500',
+},
+});
