@@ -7,7 +7,6 @@ import CalendarioComparacion from './CalendarioComparacion';
 import Comparacion from './Comparacion';
 import CrearTrans from './CrearTrans';
 import EditarTrans from './EditarTrans';
-import Egresos from './Egresos';
 import Gastos from './Gastos';
 import Ingresos from './Ingresos';
 import MenuLateral from './MenuLateral';
@@ -33,8 +32,6 @@ export default function MenuTemporal() {
       return <CrearTrans volver={() => setScreen('menu')} />;
     case 'EditarTrans':
       return <EditarTrans volver={() => setScreen('menu')} />;
-    case 'Egresos':
-      return <Egresos volver={() => setScreen('menu')} />;
     case 'Gastos':
       return <Gastos volver={() => setScreen('menu')} />;
     case 'Ingresos':
@@ -68,7 +65,6 @@ export default function MenuTemporal() {
             <Button color="#843110ff" onPress={() => setScreen('Comparacion')} title="Screen: Comparacion" />
             <Button color="#843110ff" onPress={() => setScreen('CrearTrans')} title="Screen: CrearTrans" />
             <Button color="#843110ff" onPress={() => setScreen('EditarTrans')} title="Screen: EditarTrans" />
-            <Button color="#843110ff" onPress={() => setScreen('Egresos')} title="Screen: Egresos" />
             <Button color="#843110ff" onPress={() => setScreen('Gastos')} title="Screen: Gastos" />
             <Button color="#843110ff" onPress={() => setScreen('Ingresos')} title="Screen: Ingresos" />
             <Button color="#843110ff" onPress={() => setScreen('MenuLateral')} title="Screen: MenuLateral" />
