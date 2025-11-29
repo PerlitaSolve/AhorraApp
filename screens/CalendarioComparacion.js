@@ -1,7 +1,7 @@
 import { Text, StyleSheet, View, StatusBar, TouchableOpacity, Image } from 'react-native';
 import React, { useState } from 'react';
 
-export default function CalendarioComparacion({ navigation }) {
+export default function CalendarioComparacion({ navigation, volver }) {
 
     const [mesSeleccionado, setMesSeleccionado] = useState(null);
     const [anio] = useState('20 Sep');
@@ -35,8 +35,11 @@ export default function CalendarioComparacion({ navigation }) {
             
             {/* Header */}
             <View style={styles.header}>
+                <TouchableOpacity onPress={() => volver ? volver() : navigation?.goBack()} style={styles.backButton}>
+                    <Text style={styles.backArrow}>←</Text>
+                </TouchableOpacity>
                 <Image 
-                    source={require('../assets/L-SFon.png')} 
+                    source={require('../assets/logo.png')} 
                     style={styles.logo}
                     resizeMode="contain"
                 />
@@ -102,6 +105,14 @@ const styles = StyleSheet.create({
         paddingTop: 50,
         paddingHorizontal: 20,
         paddingBottom: 10,
+    },
+    backButton: {
+        marginRight: 10,
+    },
+    backArrow: {
+        fontSize: 30,
+        color: 'white',
+        fontWeight: 'bold',
     },
     logo: {
         width: 40,

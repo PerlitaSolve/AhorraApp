@@ -1,27 +1,51 @@
 
 ///////////////////                  SCREEN OLVIDASTE CONTRASENA
 
-import { Text, StyleSheet, View, Button, TextInput, Alert } from 'react-native'
-import React, { useState } from 'react'
+import { Text, StyleSheet, View, Button, TextInput, Alert, TouchableOpacity, ActivityIndicator } from 'react-native'
+import React, { useState, useEffect } from 'react'
 import Sesion from './Sesion';
+import { recuperarPassword } from '../services/authService';
+import { initDatabase } from '../services/database';
 
-export default function Password() {
+export default function Password({ volver }) {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [conPassword, setConPassword] = useState('');
-    const [screen, setScreen] = useState('registro'); 
+    const [screen, setScreen] = useState('registro');
+    const [loading, setLoading] = useState(false);
 
-    const registrarme = () => {
+    useEffect(() => {
+        initDatabase();
+    }, []);
+
+    const recuperarContrasena = async () => {
         if (email.trim() === '' || password.trim() === '' || conPassword.trim() === '') {
-            Alert.alert("Llenar todos los campos (móvil)");
-            alert("Llenar todos los campos (web)");
-        } else if (password !== conPassword) {
-            Alert.alert('Error \nLas contraseñas no coinciden');
-            alert('Error \nLas contraseñas no coinciden');
-        } else {
-            Alert.alert('Registro exitoso');
-            setScreen('sesion'); 
+            Alert.alert("Error", "Todos los campos son obligatorios");
+            return;
+        }
+        
+        if (password !== conPassword) {
+            Alert.alert('Error', 'Las contraseñas no coinciden');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const resultado = await recuperarPassword(email, password);
+            
+            if (resultado.success) {
+                Alert.alert('Éxito', resultado.message);
+                setScreen('sesion');
+            } else {
+                Alert.alert('Error', resultado.message);
+            }
+        } catch (error) {
+            Alert.alert('Error', 'Ocurrió un error al recuperar la contraseña');
+            console.error(error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -30,8 +54,22 @@ export default function Password() {
         case 'sesion':
             return <Sesion />;
         case 'registro':
-            return (
+                if(loading){
+                    return(
+                        <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
+                            <ActivityIndicator size="large" color="#1D617A" />
+                            <Text style={{marginTop: 10}}>Recuperando contraseña...</Text>
+                        </View>
+                    );
+                }
+
+                return (
                 <View style={styles.container}>
+                    {volver && (
+                      <TouchableOpacity onPress={volver} style={styles.backButton}>
+                        <Text style={styles.backArrow}>←</Text>
+                      </TouchableOpacity>
+                    )}
                     <View style={styles.fondoArriba}>
                         <Text style={styles.titulo}>AHORRA + APP</Text>
                     </View>
@@ -45,6 +83,7 @@ export default function Password() {
                             value={email}
                             onChangeText={setEmail}
                             keyboardType='email-address'
+                            autoCapitalize='none'
                         />
 
                         <TextInput
@@ -65,7 +104,7 @@ export default function Password() {
 
                         <View style={styles.contenedorBotones}>
                             <Button color='#1D617A' title='Cancelar' onPress={() => setScreen('sesion')} />
-                            <Button color="#DBEFE1E1" onPress={registrarme} title='Continuar' />
+                            <Button color="#DBEFE1E1" onPress={recuperarContrasena} title='Continuar' />
                         </View>
                     </View>
                 </View>
@@ -104,6 +143,8 @@ const styles = StyleSheet.create({
         marginBottom: 40,
         marginTop: 20,
     },
+    backButton: { position: 'absolute', top: 50, left: 20, zIndex: 10 },
+    backArrow: { fontSize: 30, color: 'white', fontWeight: 'bold' },
     input: {
         width: '70%',
         borderWidth: 2,

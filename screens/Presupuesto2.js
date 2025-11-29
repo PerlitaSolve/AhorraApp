@@ -1,7 +1,7 @@
 import { Text, StyleSheet, View, StatusBar, ScrollView, TouchableOpacity, Image, TextInput } from 'react-native';
 import React, { useState } from 'react';
 
-export default function Presupuesto2({ navigation }) {
+export default function Presupuesto2({ navigation, volver }) {
 
     const [moneda, setMoneda] = useState('MX');
     const [categorias, setCategorias] = useState([
@@ -29,7 +29,7 @@ export default function Presupuesto2({ navigation }) {
             
             {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation?.goBack()} style={styles.backButton}>
+                <TouchableOpacity onPress={() => volver ? volver() : navigation?.goBack()} style={styles.backButton}>
                     <Text style={styles.backArrow}>←</Text>
                 </TouchableOpacity>
                 <Image 

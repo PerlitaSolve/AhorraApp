@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Button } from 'react-native';
 
-export default function Gastos({ navigation }) {
+export default function Gastos({ navigation, volver }) {
   const categorias = [
     { nombre: 'Educación', monto: '$5.000', color: '#1E90FF' },
     { nombre: 'Servicio', monto: '$220', color: '#32CD32' },
@@ -11,6 +11,11 @@ export default function Gastos({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      {volver && (
+        <TouchableOpacity onPress={volver} style={styles.backButton}>
+          <Text style={styles.backArrow}>←</Text>
+        </TouchableOpacity>
+      )}
       <View style={styles.header}>
         <Text style={styles.headerText}>AHORRA + APP</Text>
         <Text style={styles.balanceTitle}>Saldo disponible</Text>
@@ -174,6 +179,8 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     marginTop: 20,
 },
+  backButton: { position: 'absolute', top: 50, left: 20, zIndex: 10 },
+  backArrow: { fontSize: 30, color: 'white', fontWeight: 'bold' },
   addButtonText: { 
     color: '#FFF', 
     fontSize: 18, 

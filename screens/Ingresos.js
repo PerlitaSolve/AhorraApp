@@ -1,9 +1,14 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 
-export default function Ingresos({ navigation }) {
+export default function Ingresos({ navigation, volver }) {
   return (
     <SafeAreaView style={styles.container}>
+      {volver && (
+        <TouchableOpacity onPress={volver} style={styles.backButton}>
+          <Text style={styles.backArrow}>←</Text>
+        </TouchableOpacity>
+      )}
       <View style={styles.header}>
         <View style={styles.tabsContainer}>
           <TouchableOpacity style={[styles.tab, styles.inactiveTab]}>
@@ -119,6 +124,8 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     marginTop: 20. 
 },
+  backButton: { position: 'absolute', top: 50, left: 20, zIndex: 10 },
+  backArrow: { fontSize: 30, color: 'white', fontWeight: 'bold' },
   addButtonText: { 
     color: '#FFF', 
     fontSize: 18, 

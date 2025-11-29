@@ -1,24 +1,29 @@
 
 ///////////////////                  SCREEN 1 LOGIN 
 
-import { Text, StyleSheet, View, Button, StatusBar } from 'react-native'// StatusBar controla la barra de estado 
+import { Text, StyleSheet, View, Button, StatusBar, TouchableOpacity } from 'react-native'// StatusBar controla la barra de estado 
 import React, { useState } from 'react'
 
 import Registro from './Registro';
 import Sesion from './Sesion';
 
-export default function App(){
+export default function App({ volver }){
 
     const [screen, setScreen] = useState('menu');
 
     switch (screen) {
         case 'registro':
-            return <Registro />;
+            return <Registro volver={volver} />;
         case 'sesion':
-            return <Sesion/>;
+            return <Sesion volver={volver} />;
         case 'menu':   
             return (
                <View style={styles.container}>
+                 {volver && (
+                   <TouchableOpacity onPress={volver} style={styles.backButton}>
+                     <Text style={styles.backArrow}>←</Text>
+                   </TouchableOpacity>
+                 )}
            
                  <Text style={styles.texto}>AHORRA + APP</Text>
                  <Text style={styles.texto2}>“¡Bienvenido!{'\n'}Tu dinero, más organizado y seguro que {'\n'} nunca.”</Text>
@@ -40,6 +45,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#1D617A',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+  },
+  backArrow: {
+    fontSize: 30,
+    color: 'white',
+    fontWeight: 'bold',
   },
   texto:{
     fontFamily:'Times New Roman',

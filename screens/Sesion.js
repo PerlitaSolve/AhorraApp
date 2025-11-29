@@ -1,47 +1,88 @@
 
 ///////////////////                  SCREEN DE INICIAR SESION CON USUARIO
 
-import { Text, StyleSheet, View, TextInput, Alert, Button, StatusBar} from 'react-native'
-import React, { useState } from 'react'
+import { Text, StyleSheet, View, TextInput, Alert, Button, StatusBar, TouchableOpacity, ActivityIndicator} from 'react-native'
+import React, { useState, useEffect } from 'react'
 import Registro from './Registro';
 import Egresos from './Egresos';
 import Password from './Password';
+import { iniciarSesion } from '../services/authService';
+import { initDatabase } from '../services/database';
 
 
-export default function Sesion() {
+export default function Sesion({ volver }) {
 
-    const [nombre, setNombre] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [screen, setScreen] = useState('menu');
+    const [loading, setLoading] = useState(false);
+    const [usuarioActual, setUsuarioActual] = useState(null);
 
-    const entrar = () =>{
-        if(nombre.trim() === '' || password.trim() === '' ){
-            Alert.alert("Llenar todos los campos  (movil)");
-            alert("Llenar todos los campos (web)");
-        }else{
-            setScreen('iniciarSesion')
+    useEffect(() => {
+        initDatabase();
+    }, []);
+
+    const entrar = async () =>{
+        if(email.trim() === '' || password.trim() === '' ){
+            Alert.alert("Error", "Por favor llena todos los campos");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const resultado = await iniciarSesion(email, password);
+            
+            if (resultado.success) {
+                Alert.alert('Bienvenido', `Hola ${resultado.usuario.nombre}`);
+                setUsuarioActual(resultado.usuario);
+                setScreen('iniciarSesion');
+            } else {
+                Alert.alert('Error', resultado.message);
+            }
+        } catch (error) {
+            Alert.alert('Error', 'Ocurrió un error al iniciar sesión');
+            console.error(error);
+        } finally {
+            setLoading(false);
         }
     }
 
     switch (screen){
         case 'iniciarSesion':
-            return <Egresos/>
+            return <Egresos usuarioId={usuarioActual?.id} usuario={usuarioActual} />
         case 'registro':
             return<Registro/>
         case 'password':
             return <Password/>
         case 'menu':
+            if(loading){
+                return(
+                    <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
+                        <ActivityIndicator size="large" color="#fff" />
+                        <Text style={{marginTop: 10, color: '#fff'}}>Iniciando sesión...</Text>
+                    </View>
+                );
+            }
+
             return(
 
                 <View style={styles.container}>
+                    {volver && (
+                      <TouchableOpacity onPress={volver} style={styles.backButton}>
+                        <Text style={styles.backArrow}>←</Text>
+                      </TouchableOpacity>
+                    )}
             
                     <Text style={styles.titulo}>AHORRO + APP</Text> 
     
                     <TextInput
                         style={styles.input}
-                        placeholder='Usuario *'
-                        value={nombre}
-                        onChangeText={setNombre}  
+                        placeholder='Email *'
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType='email-address'
+                        autoCapitalize='none'
                     />
 
                     <TextInput
@@ -95,7 +136,9 @@ const styles = StyleSheet.create({
         marginTop:25, 
         flexDirection:'column', 
     },
-    contenedorBotones:{ 
+    backButton: { position: 'absolute', top: 50, left: 20, zIndex: 10 },
+    backArrow: { fontSize: 30, color: 'white', fontWeight: 'bold' },
+    contenedorBotones: {
         marginTop:95, 
         flexDirection:'column', 
         gap:15,

@@ -1,7 +1,7 @@
 import { Text, StyleSheet, View, StatusBar, ScrollView, TouchableOpacity, Image } from 'react-native';
 import React, { useState } from 'react';
 
-export default function Presupuesto1({ navigation }) {
+export default function Presupuesto1({ navigation, volver }) {
 
     const [categorias, setCategorias] = useState([
         { id: 1, nombre: 'ALIMENTACIÓN', monto: '3,500' },
@@ -31,7 +31,7 @@ export default function Presupuesto1({ navigation }) {
             
             {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation?.goBack()} style={styles.backButton}>
+                <TouchableOpacity onPress={() => volver ? volver() : navigation?.goBack()} style={styles.backButton}>
                     <Text style={styles.backArrow}>←</Text>
                 </TouchableOpacity>
                 <Image 

@@ -1,7 +1,7 @@
 import { Text, StyleSheet, View, StatusBar, ScrollView, TouchableOpacity, Image } from 'react-native';
 import React from 'react';
 
-export default function Notificaciones({ navigation }) {
+export default function Notificaciones({ navigation, volver }) {
 
     const notificaciones = [
         {
@@ -32,7 +32,7 @@ export default function Notificaciones({ navigation }) {
             
             {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <TouchableOpacity onPress={() => volver ? volver() : navigation?.goBack()} style={styles.backButton}>
                     <Text style={styles.backArrow}>←</Text>
                 </TouchableOpacity>
                 <Image 

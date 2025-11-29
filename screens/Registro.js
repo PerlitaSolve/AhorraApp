@@ -1,43 +1,84 @@
 
 ///////////////////                  SCREEN DE REGISTRARSE 
 
-import { Text, StyleSheet, View, Button, TextInput, Alert } from 'react-native'
-import React,{useState} from 'react'
+import { Text, StyleSheet, View, Button, TextInput, Alert, TouchableOpacity, ActivityIndicator } from 'react-native'
+import React,{useState, useEffect} from 'react'
 import Autenticacion from './Autenticacion';
 import Egresos from './Egresos';
+import { registrarUsuario } from '../services/authService';
+import { initDatabase } from '../services/database';
 
-export default function Registro() {
+export default function Registro({ volver }) {
     const [nombre, setNombre] = useState('');
     const [password, setPassword] = useState('');
     const [conPassword, setconPassword] = useState('');
     const [telefono, setTelefono] = useState('');
     const [email, setEmail] = useState('');
     const [screen, setScreen] = useState('registro');
+    const [loading, setLoading] = useState(false);
+    const [usuarioId, setUsuarioId] = useState(null);
 
-    const registrarme = () => {
+    useEffect(() => {
+        initDatabase();
+    }, []);
+
+    const registrarme = async () => {
+        // Validación de campos vacíos
         if(nombre.trim() === '' || password.trim() === '' || telefono.trim()=== '' || email.trim()=== ''|| conPassword.trim()=== ''){
-            Alert.alert("Llenar todos los campos  (movil)");
-            alert("Llenar todos los campos (web)");
-        } else if (conPassword != password){
-            //alert para movil
-            Alert.alert('Error \n' + 'Las contraseñas no coinciden');
-            //alert para web
-            alert('Error \n' + 'Las contraseñas no coinciden');
-        }else{
-            setScreen('egresos');
+            Alert.alert("Error", "Todos los campos son obligatorios");
+            return;
+        }
+        
+        // Validación de contraseñas coinciden
+        if (conPassword !== password){
+            Alert.alert('Error', 'Las contraseñas no coinciden');
+            return;
+        }
+
+        setLoading(true);
+        
+        try {
+            // Registrar usuario en la base de datos
+            const resultado = await registrarUsuario(nombre, email, password, telefono);
+            
+            if (resultado.success) {
+                Alert.alert('Éxito', resultado.message);
+                setUsuarioId(resultado.userId);
+                setScreen('egresos');
+            } else {
+                Alert.alert('Error', resultado.message);
+            }
+        } catch (error) {
+            Alert.alert('Error', 'Ocurrió un error al registrar el usuario');
+            console.error(error);
+        } finally {
+            setLoading(false);
         }
     }
 
     if(screen === 'egresos'){
-        return<Egresos />;
+        return<Egresos usuarioId={usuarioId} />;
     }
     if(screen === 'cancelar'){
         return<Autenticacion/>;
     }
     
+    if(loading){
+        return(
+            <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
+                <ActivityIndicator size="large" color="#1D617A" />
+                <Text style={{marginTop: 10}}>Registrando usuario...</Text>
+            </View>
+        );
+    }
 
     return(
         <View style={styles.container}>
+            {volver && (
+              <TouchableOpacity onPress={volver} style={styles.backButton}>
+                <Text style={styles.backArrow}>←</Text>
+              </TouchableOpacity>
+            )}
             <View style={styles.fondoArriba}>
                 <Text style= {styles.titulo}>AHORRA + APP</Text>
             </View>
@@ -170,6 +211,8 @@ const styles = StyleSheet.create({
     flexDirection:'row', 
     gap:65, 
   },
+  backButton: { position: 'absolute', top: 50, left: 20, zIndex: 10 },
+  backArrow: { fontSize: 30, color: 'white', fontWeight: 'bold' },
 })
 
 

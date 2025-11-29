@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView} fro
 import { MaterialCommunityIcons } from '@expo/vector-icons';  
 
 
-export default function MenuLateral({ navigation }) {
+export default function MenuLateral({ navigation, volver }) {
 
   const menuItems = [
         { name: 'Transacciones', icon: 'repeat', screen: 'Transactions' },
@@ -22,6 +22,11 @@ const navigateToDetails = (screen) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
+        {volver && (
+          <TouchableOpacity onPress={volver} style={styles.backButtonTop}>
+            <Text style={styles.backArrow}>←</Text>
+          </TouchableOpacity>
+        )}
         <Text style={styles.headerTitle}>Menú Lateral</Text>
 
         <View style={styles.profileCard}>
@@ -170,4 +175,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
+    backButtonTop: { marginBottom: 10 },
+    backArrow: { fontSize: 30, color: '#357D8B', fontWeight: 'bold' },
 });

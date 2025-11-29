@@ -1,30 +1,100 @@
-import { Text, StyleSheet, View, ImageBackground, Image, Button, TextInput, Alert, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import { Text, StyleSheet, View, ImageBackground, Image, Button, TextInput, Alert, TouchableOpacity, ActivityIndicator } from 'react-native'
+import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons';
+import { actualizarTransaccion } from '../services/transactionService';
+import { initDatabase } from '../services/database';
 
 
 
-export default function EditarTrans() {
-  const [tipo, setTipo]=useState('GASTO');
-  const Guardar=()=>{
-      Alert.alert("Los cambios han sido guardados");
-      alert("Los cambios han sido guardados");
-  }
+export default function EditarTrans({ volver, usuarioId, transaccion, onTransaccionEditada }) {
+  const [tipo, setTipo] = useState(transaccion?.tipo || 'GASTO');
+  const [monto, setMonto] = useState(transaccion?.monto?.toString() || '');
+  const [categoria, setCategoria] = useState(transaccion?.categoria || '');
+  const [descripcion, setDescripcion] = useState(transaccion?.descripcion || '');
+  const [fecha, setFecha] = useState(transaccion?.fecha || '');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    initDatabase();
+  }, []);
+
+  const formatearFechaParaMostrar = (fechaISO) => {
+    if (!fechaISO) return '';
+    const date = new Date(fechaISO);
+    const dia = date.getDate().toString().padStart(2, '0');
+    const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+    const anio = date.getFullYear();
+    return `${dia}/${mes}/${anio}`;
+  };
+
+  const Guardar = async () => {
+    if (!monto || !categoria) {
+      Alert.alert('Error', 'El monto y la categoría son obligatorios');
+      return;
+    }
+
+    if (isNaN(monto) || parseFloat(monto) <= 0) {
+      Alert.alert('Error', 'El monto debe ser un número válido mayor a 0');
+      return;
+    }
+
+    if (!usuarioId || !transaccion?.id) {
+      Alert.alert('Error', 'No se puede actualizar la transacción');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const datosActualizados = {
+        tipo,
+        monto: parseFloat(monto),
+        categoria,
+        descripcion
+      };
+
+      const resultado = await actualizarTransaccion(transaccion.id, usuarioId, datosActualizados);
+
+      if (resultado.success) {
+        Alert.alert('Éxito', 'Transacción actualizada correctamente');
+        if (onTransaccionEditada) {
+          onTransaccionEditada();
+        }
+        if (volver) {
+          volver();
+        }
+      } else {
+        Alert.alert('Error', resultado.message);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Ocurrió un error al actualizar la transacción');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
     return (
       <ImageBackground style={styles.background} source={require('../assets/FEdita.png')}>
         <View style={styles.container}>
+            {volver && (
+              <TouchableOpacity onPress={volver} style={styles.backButton}>
+                <Text style={styles.backArrow}>←</Text>
+              </TouchableOpacity>
+            )}
             <Image source={require('../assets/L-SFon.png')} style={styles.logo}/>
             <Text style={styles.titulo}>Editar Transacción</Text>
             <Text style={styles.subtitulos}>Fecha</Text>
 
             <View style={styles.fecha}>
-            <TextInput
-              style={[styles.input2]}
-              placeholder="15/Septiembre/2025"
-              placeholderTextColor="#003d4d"
-            />
-            <Ionicons name="calendar-outline" size={24} color="#52b8d5ff" style={styles.iconos} />
+              <TextInput
+                style={[styles.input2]}
+                placeholder="DD/MM/YYYY"
+                placeholderTextColor="#003d4d"
+                value={formatearFechaParaMostrar(fecha)}
+                editable={false}
+              />
+              <Ionicons name="calendar-outline" size={24} color="#52b8d5ff" style={styles.iconos} />
             </View>
 
             <Text style={styles.subtitulos}>Tipo de Movimiento</Text>
@@ -49,16 +119,37 @@ export default function EditarTrans() {
             
             <View/>
             <Text style={styles.subtitulos}>Cantidad</Text>
-            <TextInput style={styles.input} placeholder="Monto" keyboardType="numeric" />
+            <TextInput 
+              style={styles.input} 
+              placeholder="Monto" 
+              keyboardType="numeric"
+              value={monto}
+              onChangeText={setMonto}
+            />
 
             <Text style={styles.subtitulos}>Categoría</Text>
-            <TextInput style={styles.input} placeholder="Categoría" />
+            <TextInput 
+              style={styles.input} 
+              placeholder="Categoría"
+              value={categoria}
+              onChangeText={setCategoria}
+            />
+            
             <Text style={styles.subtitulos}>Descripción</Text>
-            <TextInput style={styles.input} placeholder="Descripción" />
+            <TextInput 
+              style={styles.input} 
+              placeholder="Descripción"
+              value={descripcion}
+              onChangeText={setDescripcion}
+            />
 
-            <View style={styles.botones}>
-            <Button style={styles.boton} color='#4c79e3ce' title="Guardar cambios" onPress={Guardar}/>
-            </View>
+            {loading ? (
+              <ActivityIndicator size="large" color="#fff" style={{marginTop: 20}} />
+            ) : (
+              <View style={styles.botones}>
+                <Button style={styles.boton} color='#4c79e3ce' title="Guardar cambios" onPress={Guardar}/>
+              </View>
+            )}
         </View>
       </ImageBackground>
     )
@@ -154,6 +245,8 @@ const styles = StyleSheet.create({
         color: '#003d4d',
                  
     },
+    backButton: { position: 'absolute', top: 50, left: 20, zIndex: 10 },
+    backArrow: { fontSize: 30, color: 'white', fontWeight: 'bold' },
     boton:{
         marginTop: 10,
         borderRadius: 50,

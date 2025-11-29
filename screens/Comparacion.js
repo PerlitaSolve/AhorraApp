@@ -4,7 +4,7 @@ import { BarChart } from 'react-native-chart-kit';
 
 const screenWidth = Dimensions.get('window').width - 40; // chart width inside card
 
-export default function Comparacion({ navigation }) {
+export default function Comparacion({ navigation, volver }) {
   // Por defecto mostrar SEPTIEMBRE
   const [mesSeleccionado, setMesSeleccionado] = useState(9);
 
@@ -37,6 +37,11 @@ export default function Comparacion({ navigation }) {
 
       {/* Header */}
       <View style={styles.header}>
+        {volver && (
+          <TouchableOpacity onPress={volver} style={styles.backButton}>
+            <Text style={styles.backArrow}>←</Text>
+          </TouchableOpacity>
+        )}
         <Image source={require('../assets/L-SFon.png')} style={styles.logo} />
         <Text style={styles.headerTitle}>AHORRA + APP</Text>
         <TouchableOpacity onPress={() => navigation?.openDrawer && navigation.openDrawer()} style={styles.hamburger}>
@@ -103,6 +108,8 @@ export default function Comparacion({ navigation }) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1D617A' },
   header: { height: 80, backgroundColor: '#1D617A', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 },
+  backButton: { marginRight: 10 },
+  backArrow: { fontSize: 30, color: 'white', fontWeight: 'bold' },
   logo: { width: 56, height: 56 },
   headerTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginLeft: 12, flex: 1 },
   hamburger: { padding: 8 },

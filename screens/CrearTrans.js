@@ -1,16 +1,83 @@
-import { Text, StyleSheet, View, ImageBackground, Button, TextInput, Image, TouchableOpacity} from 'react-native'
-import React, { useState } from 'react'
+import { Text, StyleSheet, View, ImageBackground, Button, TextInput, Image, TouchableOpacity, Alert, ActivityIndicator} from 'react-native'
+import React, { useState, useEffect } from 'react'
+import { crearTransaccion } from '../services/transactionService';
+import { initDatabase } from '../services/database';
 
-export default function CrearTrans() {
+export default function CrearTrans({ volver, usuarioId, onTransaccionCreada }) {
   const [monto, setMonto]=useState('');
   const [categoria, setCategoria]=useState('');
   const [descripcion, setDescripcion]=useState('');
   const [tipo, setTipo] = useState('GASTO');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    initDatabase();
+  }, []);
+
+  const agregarTransaccion = async () => {
+    if (!monto || !categoria) {
+      Alert.alert('Error', 'El monto y la categoría son obligatorios');
+      return;
+    }
+
+    if (isNaN(monto) || parseFloat(monto) <= 0) {
+      Alert.alert('Error', 'El monto debe ser un número válido mayor a 0');
+      return;
+    }
+
+    if (!usuarioId) {
+      Alert.alert('Error', 'Debes iniciar sesión para crear transacciones');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const resultado = await crearTransaccion(
+        usuarioId,
+        tipo,
+        monto,
+        categoria,
+        descripcion
+      );
+
+      if (resultado.success) {
+        Alert.alert('Éxito', 'Transacción creada correctamente');
+        // Limpiar campos
+        setMonto('');
+        setCategoria('');
+        setDescripcion('');
+        setTipo('GASTO');
+        
+        // Notificar que se creó la transacción
+        if (onTransaccionCreada) {
+          onTransaccionCreada();
+        }
+        
+        // Volver a la pantalla anterior
+        if (volver) {
+          volver();
+        }
+      } else {
+        Alert.alert('Error', resultado.message);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Ocurrió un error al crear la transacción');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
     return (
         <ImageBackground style={styles.background} source={require('../assets/FCrear.png')}>
             <View style={styles.container}>
                 <View style={styles.nombrecontainer}>
+                    {volver && (
+                      <TouchableOpacity onPress={volver} style={styles.backButton}>
+                        <Text style={styles.backArrow}>←</Text>
+                      </TouchableOpacity>
+                    )}
                     <Image source={require('../assets/L-SFon.png')} style={styles.logo}/>
                     <Text style={styles.nombre}>AHORRA + APP</Text>
                     <TouchableOpacity style={styles.menuButton}>
@@ -46,6 +113,7 @@ export default function CrearTrans() {
                         placeholder='$Monto'
                         value={monto}
                         onChangeText={setMonto}
+                        keyboardType='numeric'
                     />
                     <Text style={styles.subtitulos}>Categoria</Text>
                 
@@ -63,12 +131,17 @@ export default function CrearTrans() {
                         onChangeText={setDescripcion}
                     />
 
-                    <View>
-                    <Button 
-                    style={styles.boton} 
-                    color={'#4c79e3ce'}
-                    title={'Añadir'}/>
-                    </View>
+                    {loading ? (
+                        <ActivityIndicator size="large" color="#fff" style={{marginTop: 20}} />
+                    ) : (
+                        <View>
+                        <Button 
+                        style={styles.boton} 
+                        color={'#4c79e3ce'}
+                        title={'Añadir'}
+                        onPress={agregarTransaccion}/>
+                        </View>
+                    )}
                 </View>
 
             </View>
@@ -173,4 +246,6 @@ const styles = StyleSheet.create({
         color: '#003d4d',
                  
     },
+    backButton: { marginRight: 10 },
+    backArrow: { fontSize: 30, color: 'white', fontWeight: 'bold' },
 })
