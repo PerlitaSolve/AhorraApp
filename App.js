@@ -1,9 +1,7 @@
-import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { createDrawerNavigator } from '@react-navigation/drawer';
 
 // Screens
 import Autenticacion from './screens/Autenticacion';
@@ -26,25 +24,6 @@ import { UserProvider } from './context/UserContext';
 import { initDatabase } from './services/database';
 
 const Stack = createStackNavigator();
-const Drawer = createDrawerNavigator();
-
-function DrawerNavigator() {
-  return (
-    <Drawer.Navigator
-      initialRouteName="Ingresos"
-      drawerContent={(props) => <MenuLateral {...props} />}
-    >
-      <Drawer.Screen name="Ingresos" component={Ingresos} options={{ headerShown: false }} />
-      <Drawer.Screen name="Gastos" component={Gastos} options={{ headerShown: false }} />
-      <Drawer.Screen name="Comparacion" component={Comparacion} options={{ headerShown: false }} />
-      <Drawer.Screen name="Transacciones" component={Transacciones} options={{ headerShown: false }} />
-      <Drawer.Screen name="Notificaciones" component={Notificaciones} options={{ headerShown: false }} />
-      <Drawer.Screen name="Presupuesto1" component={Presupuesto1} options={{ headerShown: false }} />
-      <Drawer.Screen name="Presupuesto2" component={Presupuesto2} options={{ headerShown: false }} />
-      <Drawer.Screen name="CalendarioComparacion" component={CalendarioComparacion} options={{ headerShown: false }} />
-    </Drawer.Navigator>
-  );
-}
 
 // 2. Main: Zona de componentes
 export default function App() {
@@ -112,7 +91,52 @@ export default function App() {
           />
           <Stack.Screen 
             name="Home" 
-            component={DrawerNavigator} 
+            component={Ingresos} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Ingresos" 
+            component={Ingresos} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Gastos" 
+            component={Gastos} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Comparacion" 
+            component={Comparacion} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Transacciones" 
+            component={Transacciones} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Notificaciones" 
+            component={Notificaciones} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Presupuesto1" 
+            component={Presupuesto1} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Presupuesto2" 
+            component={Presupuesto2} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="CalendarioComparacion" 
+            component={CalendarioComparacion} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="MenuLateral" 
+            component={MenuLateral} 
             options={{ headerShown: false }} 
           />
           <Stack.Screen 
