@@ -1,4 +1,4 @@
-import { Text, StyleSheet, View, ImageBackground, Button, TextInput, Image, TouchableOpacity, Alert, ActivityIndicator} from 'react-native'
+import { Text, StyleSheet, View, ImageBackground, Pressable, TextInput, Image, TouchableOpacity, Alert, ActivityIndicator} from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { crearTransaccion } from '../services/transactionService';
 import { initDatabase } from '../services/database';
@@ -135,11 +135,11 @@ export default function CrearTrans({ volver, usuarioId, onTransaccionCreada }) {
                         <ActivityIndicator size="large" color="#fff" style={{marginTop: 20}} />
                     ) : (
                         <View>
-                        <Button 
+                        <Pressable 
                         style={styles.boton} 
-                        color={'#4c79e3ce'}
-                        title={'Añadir'}
-                        onPress={agregarTransaccion}/>
+                        onPress={agregarTransaccion}>
+                            <Text style={styles.botonTexto}>Añadir</Text>
+                        </Pressable>
                         </View>
                     )}
                 </View>
@@ -217,11 +217,18 @@ const styles = StyleSheet.create({
         alignContent: 'center', 
     },
     boton:{
-        marginTop: 10,
-        borderRadius: 30,
-        overflow: 'hidden',
-        gap: 10,
-        flexDirection: 'row-reverse',
+        marginTop: 20,
+        backgroundColor: '#4c79e3ce',
+        paddingVertical: 14,
+        paddingHorizontal: 40,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    botonTexto: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     menuIcon: {
         fontSize: 28,

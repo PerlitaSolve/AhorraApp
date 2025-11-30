@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, FlatList, Button, ImageBackground, Image, Alert, TouchableOpacity, ActivityIndicator, TextInput, Modal } from 'react-native'
+import { StyleSheet, Text, View, FlatList, Pressable, ImageBackground, Image, Alert, TouchableOpacity, ActivityIndicator, TextInput, Modal } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { obtenerTransacciones, eliminarTransaccion, obtenerTransaccionesFiltradas, obtenerCategorias } from '../services/transactionService'
@@ -209,8 +209,12 @@ export default function Transacciones({ volver, usuarioId, onEditarTransaccion }
                     <Text style={styles.titulo}>TRANSACCIONES</Text>
                     
                     <View style={{flexDirection: 'row', gap: 10}}>
-                        <Button style={styles.boton} color='#4c79e3ce' title="Añadir +" onPress={() => setMostrarCrear(true)} />
-                        <Button style={styles.boton} color='#7bdcb5' title="Filtros" onPress={() => setMostrarFiltros(true)} />
+                        <Pressable style={styles.botonAnadir} onPress={() => setMostrarCrear(true)}>
+                            <Text style={styles.botonTexto}>Añadir +</Text>
+                        </Pressable>
+                        <Pressable style={styles.botonFiltros} onPress={() => setMostrarFiltros(true)}>
+                            <Text style={styles.botonTexto}>Filtros</Text>
+                        </Pressable>
                     </View>
                 </View>
 
@@ -234,7 +238,9 @@ export default function Transacciones({ volver, usuarioId, onEditarTransaccion }
                     </View>
 
                     <View style={styles.botonContainer}>
-                        <Button color='#4c79e3ce' title="Recargar" onPress={cargarTransacciones} />
+                        <Pressable style={styles.botonRecargar} onPress={cargarTransacciones}>
+                            <Text style={styles.botonTexto}>Recargar</Text>
+                        </Pressable>
                     </View>
                 </View>
             </View>
@@ -291,9 +297,15 @@ export default function Transacciones({ volver, usuarioId, onEditarTransaccion }
                         />
 
                         <View style={{flexDirection: 'row', gap: 10, marginTop: 20}}>
-                            <Button title="Aplicar" onPress={aplicarFiltros} color='#4c79e3ce' />
-                            <Button title="Limpiar" onPress={limpiarFiltros} color='#7bdcb5' />
-                            <Button title="Cerrar" onPress={() => setMostrarFiltros(false)} color='#999' />
+                            <Pressable style={styles.botonModalAplicar} onPress={aplicarFiltros}>
+                                <Text style={styles.botonModalTexto}>Aplicar</Text>
+                            </Pressable>
+                            <Pressable style={styles.botonModalLimpiar} onPress={limpiarFiltros}>
+                                <Text style={styles.botonModalTexto}>Limpiar</Text>
+                            </Pressable>
+                            <Pressable style={styles.botonModalCerrar} onPress={() => setMostrarFiltros(false)}>
+                                <Text style={styles.botonModalTexto}>Cerrar</Text>
+                            </Pressable>
                         </View>
                     </View>
                 </View>
@@ -452,5 +464,60 @@ export const styles = StyleSheet.create({
     filtroBtnActivo: {
         backgroundColor: '#7bdcb5',
         borderColor: '#7bdcb5',
+    },
+    botonAnadir: {
+        backgroundColor: '#4c79e3ce',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    botonFiltros: {
+        backgroundColor: '#7bdcb5',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    botonRecargar: {
+        backgroundColor: '#4c79e3ce',
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    botonTexto: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+    botonModalAplicar: {
+        flex: 1,
+        backgroundColor: '#4c79e3ce',
+        paddingVertical: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    botonModalLimpiar: {
+        flex: 1,
+        backgroundColor: '#7bdcb5',
+        paddingVertical: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    botonModalCerrar: {
+        flex: 1,
+        backgroundColor: '#999',
+        paddingVertical: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+    },
+    botonModalTexto: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: 'bold',
     },
 });

@@ -1,7 +1,7 @@
 
 ///////////////////                  SCREEN OLVIDASTE CONTRASENA
 
-import { Text, StyleSheet, View, Button, TextInput, Alert, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { Text, StyleSheet, View, Pressable, TextInput, Alert, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Sesion from './Sesion';
 import { recuperarPassword } from '../services/authService';
@@ -103,8 +103,12 @@ export default function Password({ volver }) {
                         />
 
                         <View style={styles.contenedorBotones}>
-                            <Button color='#1D617A' title='Cancelar' onPress={() => setScreen('sesion')} />
-                            <Button color="#DBEFE1E1" onPress={recuperarContrasena} title='Continuar' />
+                            <Pressable style={styles.boton} onPress={() => setScreen('sesion')}>
+                                <Text style={styles.botonTexto}>Cancelar</Text>
+                            </Pressable>
+                            <Pressable style={styles.botonPrimario} onPress={recuperarContrasena}>
+                                <Text style={styles.botonTextoPrimario}>Continuar</Text>
+                            </Pressable>
                         </View>
                     </View>
                 </View>
@@ -158,5 +162,31 @@ const styles = StyleSheet.create({
         marginTop: 25,
         flexDirection: 'row',
         gap: 65,
+    },
+    boton: {
+        backgroundColor: '#1D617A',
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    botonPrimario: {
+        backgroundColor: '#DBEFE1E1',
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    botonTexto: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    botonTextoPrimario: {
+        color: '#1D617A',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });

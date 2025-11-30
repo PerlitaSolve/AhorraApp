@@ -1,7 +1,7 @@
 
 ///////////////////                  SCREEN DE INICIAR SESION CON USUARIO
 
-import { Text, StyleSheet, View, TextInput, Alert, Button, StatusBar, TouchableOpacity, ActivityIndicator} from 'react-native'
+import { Text, StyleSheet, View, TextInput, Alert, Pressable, StatusBar, TouchableOpacity, ActivityIndicator} from 'react-native'
 import React, { useState, useEffect } from 'react'
 import Registro from './Registro';
 import Egresos from './Egresos';
@@ -94,12 +94,18 @@ export default function Sesion({ volver }) {
                     /> 
 
                     <View style={styles.contenedorBoton}>
-                    <Button color="#DBEFE1E1" onPress={entrar} title='Iniciar Sesion'></Button>
+                    <Pressable style={styles.botonPrimario} onPress={entrar}>
+                        <Text style={styles.botonTextoPrimario}>Iniciar Sesión</Text>
+                    </Pressable>
                     </View>
 
                     <View style={styles.contenedorBotones}>
-                    <Button color="#1D617A" onPress={() => setScreen('registro')} title='Quiero registrarme '></Button>
-                    <Button color="#1D617A" onPress={() => setScreen('password')} title='¿ Olvidaste tú contraseña ? '></Button>
+                    <Pressable style={styles.botonSecundario} onPress={() => setScreen('registro')}>
+                        <Text style={styles.botonTextoSecundario}>Quiero registrarme</Text>
+                    </Pressable>
+                    <Pressable style={styles.botonSecundario} onPress={() => setScreen('password')}>
+                        <Text style={styles.botonTextoSecundario}>¿Olvidaste tu contraseña?</Text>
+                    </Pressable>
                     </View>
 
                     <StatusBar style="auto" />
@@ -135,6 +141,34 @@ const styles = StyleSheet.create({
     contenedorBoton:{ 
         marginTop:25, 
         flexDirection:'column', 
+    },
+    botonPrimario: {
+        backgroundColor: '#DBEFE1E1',
+        paddingVertical: 14,
+        paddingHorizontal: 40,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: 200,
+    },
+    botonTextoPrimario: {
+        color: '#1D617A',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    botonSecundario: {
+        backgroundColor: 'transparent',
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#fff',
+    },
+    botonTextoSecundario: {
+        color: '#fff',
+        fontSize: 14,
     },
     backButton: { position: 'absolute', top: 50, left: 20, zIndex: 10 },
     backArrow: { fontSize: 30, color: 'white', fontWeight: 'bold' },

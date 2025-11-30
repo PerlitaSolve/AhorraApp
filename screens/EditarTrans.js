@@ -1,4 +1,4 @@
-import { Text, StyleSheet, View, ImageBackground, Image, Button, TextInput, Alert, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { Text, StyleSheet, View, ImageBackground, Image, Pressable, TextInput, Alert, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons';
 import { actualizarTransaccion } from '../services/transactionService';
@@ -147,7 +147,9 @@ export default function EditarTrans({ volver, usuarioId, transaccion, onTransacc
               <ActivityIndicator size="large" color="#fff" style={{marginTop: 20}} />
             ) : (
               <View style={styles.botones}>
-                <Button style={styles.boton} color='#4c79e3ce' title="Guardar cambios" onPress={Guardar}/>
+                <Pressable style={styles.boton} onPress={Guardar}>
+                    <Text style={styles.botonTexto}>Guardar cambios</Text>
+                </Pressable>
               </View>
             )}
         </View>
@@ -249,9 +251,17 @@ const styles = StyleSheet.create({
     backArrow: { fontSize: 30, color: 'white', fontWeight: 'bold' },
     boton:{
         marginTop: 10,
-        borderRadius: 50,
-        padding: 12,
+        backgroundColor: '#4c79e3ce',
+        paddingVertical: 14,
+        paddingHorizontal: 40,
+        borderRadius: 8,
         alignItems: 'center',
+        justifyContent: 'center',
+    },
+    botonTexto: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
         fontFamily:'Italic',     
     },
     fecha:{
