@@ -3,15 +3,24 @@ import React, { useState, useEffect } from 'react'
 import { crearTransaccion } from '../services/transactionService';
 import { initDatabase } from '../services/database';
 
-export default function CrearTrans({ volver, usuarioId, onTransaccionCreada }) {
+export default function CrearTrans({ volver, usuarioId, onTransaccionCreada, navigation, route }) {
   const [monto, setMonto]=useState('');
   const [categoria, setCategoria]=useState('');
   const [descripcion, setDescripcion]=useState('');
   const [tipo, setTipo] = useState('GASTO');
   const [loading, setLoading] = useState(false);
 
+  // Obtener usuarioId y tipo del contexto o parámetros de navegación
+  const { useUser } = require('../context/UserContext');
+  const { usuario } = useUser();
+  const actualUsuarioId = usuarioId || usuario?.id;
+  const tipoInicial = route?.params?.tipo || 'GASTO';
+
   useEffect(() => {
     initDatabase();
+    if (tipoInicial) {
+      setTipo(tipoInicial);
+    }
   }, []);
 
   const agregarTransaccion = async () => {
@@ -25,7 +34,7 @@ export default function CrearTrans({ volver, usuarioId, onTransaccionCreada }) {
       return;
     }
 
-    if (!usuarioId) {
+    if (!actualUsuarioId) {
       Alert.alert('Error', 'Debes iniciar sesión para crear transacciones');
       return;
     }
@@ -34,7 +43,7 @@ export default function CrearTrans({ volver, usuarioId, onTransaccionCreada }) {
 
     try {
       const resultado = await crearTransaccion(
-        usuarioId,
+        actualUsuarioId,
         tipo,
         monto,
         categoria,
@@ -55,7 +64,9 @@ export default function CrearTrans({ volver, usuarioId, onTransaccionCreada }) {
         }
         
         // Volver a la pantalla anterior
-        if (volver) {
+        if (navigation?.goBack) {
+          navigation.goBack();
+        } else if (volver) {
           volver();
         }
       } else {

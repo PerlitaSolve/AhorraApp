@@ -1,22 +1,69 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, StatusBar, ScrollView, TouchableOpacity, Image, SafeAreaView, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, StatusBar, ScrollView, TouchableOpacity, Image, SafeAreaView, Dimensions, ActivityIndicator } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
+import { useUser } from '../context/UserContext';
+import { obtenerResumenTransacciones } from '../services/transactionService';
 
-const screenWidth = Dimensions.get('window').width - 40; // chart width inside card
+const screenWidth = Dimensions.get('window').width - 40;
 
 export default function Comparacion({ navigation, volver }) {
-  // Por defecto mostrar SEPTIEMBRE
-  const [mesSeleccionado, setMesSeleccionado] = useState(9);
+  const { usuario } = useUser();
+  const [mesSeleccionado, setMesSeleccionado] = useState(new Date().getMonth() + 1);
+  const [anioSeleccionado, setAnioSeleccionado] = useState(new Date().getFullYear());
+  const [cargando, setCargando] = useState(false);
+  const [datosGrafica, setDatosGrafica] = useState(null);
+  const [resumen, setResumen] = useState({ ingresos: 0, gastos: 0, balance: 0 });
+  const [alerta, setAlerta] = useState('');
 
-  // Datos de ejemplo (reemplaza con tus datos reales)
-  const data = {
-    labels: ['INGRESOS', 'GASTOS'],
-    datasets: [
-      {
-        data: [1800, 5200],
-      },
-    ],
+  const mesesNombres = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  const mesesCompletos = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+
+  const cargarDatos = async () => {
+    if (!usuario?.id) {
+      console.log('No hay usuario autenticado');
+      return;
+    }
+
+    setCargando(true);
+    try {
+      const resultado = await obtenerResumenTransacciones(usuario.id, {
+        mes: mesSeleccionado,
+        anio: anioSeleccionado
+      });
+
+      if (resultado.success) {
+        const { ingresos, gastos, balance } = resultado.resumen;
+        setResumen({ ingresos, gastos, balance });
+
+        // Crear gráfica
+        setDatosGrafica({
+          labels: ['INGRESOS', 'GASTOS'],
+          datasets: [
+            {
+              data: [ingresos, gastos],
+            },
+          ],
+        });
+
+        // Generar alerta según el balance
+        if (gastos > ingresos) {
+          setAlerta(`Este mes tus gastos superaron a tus ingresos en $${(gastos - ingresos).toFixed(2)}. Considera revisar tus presupuestos.`);
+        } else if (ingresos > gastos) {
+          setAlerta(`¡Excelente! Este mes ahorraste $${(ingresos - gastos).toFixed(2)}. Continúa así.`);
+        } else {
+          setAlerta('Este mes tus ingresos y gastos fueron iguales.');
+        }
+      }
+    } catch (error) {
+      console.error('Error al cargar comparación:', error);
+    } finally {
+      setCargando(false);
+    }
   };
+
+  useEffect(() => {
+    cargarDatos();
+  }, [mesSeleccionado, anioSeleccionado, usuario?.id]);
 
   const chartConfig = {
     backgroundGradientFrom: '#ffffff',
@@ -29,7 +76,11 @@ export default function Comparacion({ navigation, volver }) {
     style: { borderRadius: 8 },
   };
 
-  const mesesNombres = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  const getAlertColor = () => {
+    if (resumen.balance > 0) return '#4CAF50'; // Verde
+    if (resumen.balance < 0) return '#D32F2F'; // Rojo
+    return '#0E8AA7'; // Azul neutro
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -55,21 +106,47 @@ export default function Comparacion({ navigation, volver }) {
         {/* Card centrada con mes y gráfica */}
         <View style={styles.card}>
           <Text style={styles.monthLabel}>{mesesNombres[mesSeleccionado - 1]}</Text>
-          <Text style={styles.monthTitle}>SEPTIEMBRE</Text>
+          <Text style={styles.monthTitle}>{mesesCompletos[mesSeleccionado - 1]}</Text>
 
-          <View style={styles.chartWrapper}>
-            <BarChart
-              data={data}
-              width={screenWidth}
-              height={220}
-              yAxisLabel="$"
-              chartConfig={chartConfig}
-              verticalLabelRotation={0}
-              fromZero
-              showBarTops={false}
-              withInnerLines={false}
-              style={{ borderRadius: 12 }}
-            />
+          {cargando ? (
+            <View style={{ height: 220, justifyContent: 'center', width: '100%' }}>
+              <ActivityIndicator size="large" color="#004A77" />
+            </View>
+          ) : datosGrafica ? (
+            <View style={styles.chartWrapper}>
+              <BarChart
+                data={datosGrafica}
+                width={screenWidth}
+                height={220}
+                yAxisLabel="$"
+                chartConfig={chartConfig}
+                verticalLabelRotation={0}
+                fromZero
+                showBarTops={false}
+                withInnerLines={false}
+                style={{ borderRadius: 12 }}
+              />
+            </View>
+          ) : null}
+
+          <View style={styles.statsRow}>
+            <View style={styles.statBox}>
+              <Text style={styles.statLabel}>Ingresos</Text>
+              <Text style={styles.statAmount}>$ {resumen.ingresos.toFixed(2)}</Text>
+            </View>
+            <View style={[styles.statBox, { borderLeftWidth: 1, borderLeftColor: '#E0E0E0' }]}>
+              <Text style={styles.statLabel}>Gastos</Text>
+              <Text style={[styles.statAmount, { color: '#D32F2F' }]}>$ {resumen.gastos.toFixed(2)}</Text>
+            </View>
+          </View>
+
+          <View style={styles.balanceBox}>
+            <Text style={styles.balanceLabel}>Balance del Mes</Text>
+            <Text style={[styles.balanceAmount, { color: getAlertColor() }]}>$ {resumen.balance.toFixed(2)}</Text>
+          </View>
+
+          <View style={[styles.alertBox, { backgroundColor: getAlertColor() }]}>
+            <Text style={styles.alertText}>{alerta}</Text>
           </View>
 
           <View style={styles.legendRow}>
@@ -81,10 +158,6 @@ export default function Comparacion({ navigation, volver }) {
               <View style={[styles.legendBox, { backgroundColor: '#FF4500' }]} />
               <Text style={styles.legendText}>Gastos</Text>
             </View>
-          </View>
-
-          <View style={styles.alertBox}>
-            <Text style={styles.alertText}>Este mes tus gastos superaron a tus ingresos. Considera revisar tus presupuestos para mejorar tu balance.</Text>
           </View>
         </View>
 
@@ -99,6 +172,15 @@ export default function Comparacion({ navigation, volver }) {
               <Text style={[styles.monthChipText, mesSeleccionado === idx + 1 && styles.monthChipTextActive]}>{m}</Text>
             </TouchableOpacity>
           ))}
+        </View>
+
+        <View style={styles.navButtons}>
+          <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Ingresos')}>
+            <Text style={styles.navButtonText}>Ir a Ingresos</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Gastos')}>
+            <Text style={styles.navButtonText}>Ir a Gastos</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -120,19 +202,79 @@ const styles = StyleSheet.create({
   card: { width: '90%', backgroundColor: '#fff', borderRadius: 12, padding: 16, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8, elevation: 4, marginBottom: 20 },
   monthLabel: { color: '#004A77', fontSize: 12, fontWeight: '600' },
   monthTitle: { color: '#004A77', fontSize: 22, fontWeight: 'bold', marginVertical: 8 },
-  chartWrapper: { marginTop: 6 },
+  chartWrapper: { marginTop: 6, width: '100%' },
 
-  legendRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 12 },
+  statsRow: {
+    flexDirection: 'row',
+    width: '100%',
+    marginTop: 16,
+    marginBottom: 12,
+  },
+  statBox: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  statAmount: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#004A77',
+  },
+
+  balanceBox: {
+    width: '100%',
+    backgroundColor: '#F5F5F5',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  balanceLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  balanceAmount: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+
+  legendRow: { flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#E0E0E0' },
   legendItem: { flexDirection: 'row', alignItems: 'center' },
   legendBox: { width: 12, height: 12, borderRadius: 3, marginRight: 8 },
   legendText: { fontSize: 12, color: '#333' },
 
-  alertBox: { backgroundColor: '#0E8AA7', padding: 12, borderRadius: 8, marginTop: 14, width: '100%' },
-  alertText: { color: '#fff', textAlign: 'center' },
+  alertBox: { padding: 12, borderRadius: 8, marginTop: 12, width: '100%' },
+  alertText: { color: '#fff', textAlign: 'center', fontSize: 13, fontWeight: '500' },
 
-  monthsRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', width: '100%' },
+  monthsRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', width: '100%', marginBottom: 20 },
   monthChip: { paddingHorizontal: 8, paddingVertical: 6, margin: 6, borderRadius: 6, backgroundColor: 'transparent' },
   monthChipActive: { backgroundColor: '#0F9DD6' },
   monthChipText: { color: '#E8F6F7' },
   monthChipTextActive: { color: '#fff', fontWeight: '600' },
+
+  navButtons: {
+    flexDirection: 'row',
+    gap: 10,
+    width: '90%',
+    marginBottom: 20,
+  },
+  navButton: {
+    flex: 1,
+    backgroundColor: '#004A77',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  navButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
 });
