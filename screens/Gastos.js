@@ -45,13 +45,14 @@ export default function Gastos({ navigation, volver }) {
       const resumen = await obtenerResumenTransacciones(usuario.id, filtros);
 
       if (resultado.success) {
-        setTransacciones(resultado.transacciones || []);
+        const transaccionesData = resultado.transacciones || [];
+        setTransacciones(transaccionesData);
         
         // Procesar datos para la gráfica: agrupar por categoría
         const datosAgrupados = {};
         let total = 0;
 
-        resultado.transacciones.forEach(trans => {
+        transaccionesData.forEach(trans => {
           const categoria = trans.categoria || 'Sin categoría';
           if (!datosAgrupados[categoria]) {
             datosAgrupados[categoria] = 0;
@@ -135,23 +136,26 @@ export default function Gastos({ navigation, volver }) {
           <View style={styles.chartPlaceholder}>
             <ActivityIndicator size="large" color="#004A77" />
           </View>
-        ) : datosGrafica ? (
+        ) : datosGrafica && datosGrafica.datasets && datosGrafica.datasets[0] && datosGrafica.datasets[0].data && datosGrafica.datasets[0].data.length > 0 ? (
           <>
             <View style={styles.chartContainer}>
               <PieChart
-                data={{
-                  labels: datosGrafica.labels,
-                  datasets: [{ data: datosGrafica.datasets[0].data }],
-                }}
+                data={datosGrafica.labels.map((label, index) => ({
+                  name: label,
+                  population: datosGrafica.datasets[0].data[index],
+                  color: datosGrafica.colores[index],
+                  legendFontColor: '#7F7F7F',
+                  legendFontSize: 12,
+                }))}
                 width={screenWidth}
                 height={220}
                 chartConfig={{
                   color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                 }}
-                accessor={'data'}
+                accessor={'population'}
                 backgroundColor={'transparent'}
-                paddingLeft={'0'}
-                colors={datosGrafica.colores}
+                paddingLeft={'15'}
+                absolute
               />
             </View>
 
@@ -162,9 +166,9 @@ export default function Gastos({ navigation, volver }) {
 
             <View style={styles.listContainer}>
               <Text style={styles.listTitle}>Desglose por Categoría</Text>
-              {transacciones.map((trans, idx) => (
+              {transacciones && transacciones.length > 0 && transacciones.map((trans, idx) => (
                 <View key={idx} style={styles.listItem}>
-                  <View style={[styles.colorDot, { backgroundColor: datosGrafica.colores[datosGrafica.labels.indexOf(trans.categoria)] }]} />
+                  <View style={[styles.colorDot, { backgroundColor: datosGrafica?.colores[datosGrafica.labels.indexOf(trans.categoria)] || '#ccc' }]} />
                   <View style={styles.itemInfo}>
                     <Text style={styles.itemCategory}>{trans.categoria}</Text>
                     <Text style={styles.itemDate}>{new Date(trans.fecha).toLocaleDateString()}</Text>

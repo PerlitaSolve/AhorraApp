@@ -1,12 +1,15 @@
+import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+
+// Screens
 import Autenticacion from './screens/Autenticacion';
-import Sesion from './screens/Sesion';
 import Registro from './screens/Registro';
+import Sesion from './screens/Sesion';
 import Password from './screens/Password';
-import Transacciones from './screens/Transacciones';
-import CrearTrans from './screens/CrearTrans';
-import EditarTrans from './screens/EditarTrans'; 
 import Ingresos from './screens/Ingresos';
 import Gastos from './screens/Gastos';
 import Comparacion from './screens/Comparacion';
@@ -15,13 +18,33 @@ import Presupuesto1 from './screens/Presupuesto1';
 import Presupuesto2 from './screens/Presupuesto2';
 import CalendarioComparacion from './screens/CalendarioComparacion';
 import MenuLateral from './screens/MenuLateral';
-import MenuTemporal from './screens/MenuTemporal';
+import CrearTrans from './screens/CrearTrans';
+import EditarTrans from './screens/EditarTrans';
+import Transacciones from './screens/Transacciones';
 
 import { UserProvider } from './context/UserContext';
 import { initDatabase } from './services/database';
 
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
+
+function DrawerNavigator() {
+  return (
+    <Drawer.Navigator
+      initialRouteName="Ingresos"
+      drawerContent={(props) => <MenuLateral {...props} />}
+    >
+      <Drawer.Screen name="Ingresos" component={Ingresos} options={{ headerShown: false }} />
+      <Drawer.Screen name="Gastos" component={Gastos} options={{ headerShown: false }} />
+      <Drawer.Screen name="Comparacion" component={Comparacion} options={{ headerShown: false }} />
+      <Drawer.Screen name="Transacciones" component={Transacciones} options={{ headerShown: false }} />
+      <Drawer.Screen name="Notificaciones" component={Notificaciones} options={{ headerShown: false }} />
+      <Drawer.Screen name="Presupuesto1" component={Presupuesto1} options={{ headerShown: false }} />
+      <Drawer.Screen name="Presupuesto2" component={Presupuesto2} options={{ headerShown: false }} />
+      <Drawer.Screen name="CalendarioComparacion" component={CalendarioComparacion} options={{ headerShown: false }} />
+    </Drawer.Navigator>
+  );
+}
 
 // 2. Main: Zona de componentes
 export default function App() {
@@ -63,32 +86,45 @@ export default function App() {
     );
   }
 
-  const Stack = createNativeStackNavigator();
-
   return (
     <UserProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Autenticacion" screenOptions={{ headerShown: false }}>
-          
-          <Stack.Screen name="Autenticacion" component={Autenticacion} />
-          <Stack.Screen name="Sesion" component={Sesion} />
-          <Stack.Screen name="Registro" component={Registro} />
-          <Stack.Screen name="Password" component={Password} />
-
-          <Stack.Screen name="MenuLateral" component={MenuLateral} />
-
-          <Stack.Screen name="Ingresos" component={Ingresos} />
-          <Stack.Screen name="Gastos" component={Gastos} />
-          <Stack.Screen name="Comparacion" component={Comparacion} />
-          <Stack.Screen name="Notificaciones" component={Notificaciones} />
-          <Stack.Screen name="Presupuesto1" component={Presupuesto1} />
-          <Stack.Screen name="Presupuesto2" component={Presupuesto2} />
-          <Stack.Screen name="CalendarioComparacion" component={CalendarioComparacion} />
-
-          <Stack.Screen name="Transacciones" component={Transacciones} />
-          <Stack.Screen name="CrearTrans" component={CrearTrans} />
-          <Stack.Screen name="EditarTrans" component={EditarTrans} />
-
+        <Stack.Navigator initialRouteName="Autenticacion">
+          <Stack.Screen 
+            name="Autenticacion" 
+            component={Autenticacion} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Registro" 
+            component={Registro} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Sesion" 
+            component={Sesion} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Password" 
+            component={Password} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Home" 
+            component={DrawerNavigator} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="CrearTrans" 
+            component={CrearTrans} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="EditarTrans" 
+            component={EditarTrans} 
+            options={{ headerShown: false }} 
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </UserProvider>

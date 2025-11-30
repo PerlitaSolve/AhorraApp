@@ -2,18 +2,17 @@
 ///////////////////                  SCREEN DE INICIAR SESION CON USUARIO
 
 import { Text, StyleSheet, View, TextInput, Alert, Pressable, StatusBar, TouchableOpacity, ActivityIndicator} from 'react-native'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { iniciarSesion } from '../services/authService';
 import { initDatabase } from '../services/database';
+import { UserContext } from '../context/UserContext';
 
 
 export default function Sesion({ navigation, volver }) {
-
+    const { setUser } = useContext(UserContext);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [screen, setScreen] = useState('menu');
     const [loading, setLoading] = useState(false);
-    const [usuarioActual, setUsuarioActual] = useState(null);
 
     useEffect(() => {
         initDatabase();
@@ -32,8 +31,8 @@ export default function Sesion({ navigation, volver }) {
             
             if (resultado.success) {
                 Alert.alert('Bienvenido', `Hola ${resultado.usuario.nombre}`);
-                setUsuarioActual(resultado.usuario);
-                navigation.navigate('Gastos', { usuarioId: resultado.usuario.id });
+                setUser(resultado.usuario);
+                navigation.replace('Home');
             } else {
                 Alert.alert('Error', resultado.message);
             }
@@ -56,49 +55,49 @@ export default function Sesion({ navigation, volver }) {
 
     return(
 
-        <View style={styles.container}>
-            {volver && (
-                <TouchableOpacity onPress={volver} style={styles.backButton}>
-                <Text style={styles.backArrow}>←</Text>
-                </TouchableOpacity>
-            )}
+                <View style={styles.container}>
+                    {volver && (
+                      <TouchableOpacity onPress={volver} style={styles.backButton}>
+                        <Text style={styles.backArrow}>←</Text>
+                      </TouchableOpacity>
+                    )}
+            
+                    <Text style={styles.titulo}>AHORRO + APP</Text> 
     
-            <Text style={styles.titulo}>AHORRO + APP</Text> 
+                    <TextInput
+                        style={styles.input}
+                        placeholder='Email *'
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType='email-address'
+                        autoCapitalize='none'
+                    />
 
-            <TextInput
-                style={styles.input}
-                placeholder='Email *'
-                value={email}
-                onChangeText={setEmail}
-                keyboardType='email-address'
-                autoCapitalize='none'
-            />
+                    <TextInput
+                        style={styles.input}
+                        placeholder='Contraseña *'
+                        secureTextEntry={true}
+                        value={password}
+                        onChangeText={setPassword}      
+                    /> 
 
-            <TextInput
-                style={styles.input}
-                placeholder='Contraseña *'
-                secureTextEntry={true}
-                value={password}
-                onChangeText={setPassword}      
-            /> 
+                    <View style={styles.contenedorBoton}>
+                    <Pressable style={styles.botonPrimario} onPress={entrar}>
+                        <Text style={styles.botonTextoPrimario}>Iniciar Sesión</Text>
+                    </Pressable>
+                    </View>
 
-            <View style={styles.contenedorBoton}>
-            <Pressable style={styles.botonPrimario} onPress={entrar}>
-                <Text style={styles.botonTextoPrimario}>Iniciar Sesión</Text>
-            </Pressable>
-            </View>
+                    <View style={styles.contenedorBotones}>
+                    <Pressable style={styles.botonSecundario} onPress={() => navigation.navigate('Registro')}>
+                        <Text style={styles.botonTextoSecundario}>Quiero registrarme</Text>
+                    </Pressable>
+                    <Pressable style={styles.botonSecundario} onPress={() => navigation.navigate('Password')}>
+                        <Text style={styles.botonTextoSecundario}>¿Olvidaste tu contraseña?</Text>
+                    </Pressable>
+                    </View>
 
-            <View style={styles.contenedorBotones}>
-            <Pressable style={styles.botonSecundario} onPress={() => navigation.navigate('Registro')}>
-                <Text style={styles.botonTextoSecundario}>Quiero registrarme</Text>
-            </Pressable>
-            <Pressable style={styles.botonSecundario} onPress={() => navigation.navigate('Password')}>
-                <Text style={styles.botonTextoSecundario}>¿Olvidaste tu contraseña?</Text>
-            </Pressable>
-            </View>
-
-            <StatusBar style="auto" />
-        </View>  
+                    <StatusBar style="auto" />
+                </View>  
     );
 }
 

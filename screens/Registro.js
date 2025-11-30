@@ -2,21 +2,19 @@
 ///////////////////                  SCREEN DE REGISTRARSE 
 
 import { Text, StyleSheet, View, Pressable, TextInput, Alert, TouchableOpacity, ActivityIndicator } from 'react-native'
-import React,{useState, useEffect} from 'react'
-import Autenticacion from './Autenticacion';
-
+import React,{useState, useEffect, useContext} from 'react'
 import { registrarUsuario } from '../services/authService';
 import { initDatabase } from '../services/database';
+import { UserContext } from '../context/UserContext';
 
-export default function Registro({ volver, navigation }) {
+export default function Registro({ navigation, volver }) {
+    const { setUser } = useContext(UserContext);
     const [nombre, setNombre] = useState('');
     const [password, setPassword] = useState('');
     const [conPassword, setconPassword] = useState('');
     const [telefono, setTelefono] = useState('');
     const [email, setEmail] = useState('');
-    const [screen, setScreen] = useState('registro');
     const [loading, setLoading] = useState(false);
-    const [usuarioId, setUsuarioId] = useState(null);
 
     useEffect(() => {
         initDatabase();
@@ -43,8 +41,8 @@ export default function Registro({ volver, navigation }) {
             
             if (resultado.success) {
                 Alert.alert('Éxito', resultado.message);
-                setUsuarioId(resultado.userId);
-                navigation.navigate('Gastos', { usuarioId: resultado.userId });
+                setUser({ id: resultado.userId, nombre, email, telefono });
+                navigation.replace('Home');
             } else {
                 Alert.alert('Error', resultado.message);
             }
@@ -56,7 +54,6 @@ export default function Registro({ volver, navigation }) {
         }
     }
 
-    
     if(loading){
         return(
             <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
@@ -127,7 +124,7 @@ export default function Registro({ volver, navigation }) {
             <Text style= {styles.politica}>Acepto el aviso de privacidad y{'\n'} la Jurisdiccion aplicable.</Text>
 
             <View style={styles.contenedorBotones}>
-                <Pressable style={styles.boton} onPress={() => navigation.goBack()}> //Autenticacion
+                <Pressable style={styles.boton} onPress={() => navigation.goBack()}>
                     <Text style={styles.botonTexto}>Cancelar</Text>
                 </Pressable>
                 <Pressable style={styles.botonPrimario} onPress={registrarme}>
