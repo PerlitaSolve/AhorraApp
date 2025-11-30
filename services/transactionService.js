@@ -1,4 +1,5 @@
 import { getDatabase } from './database';
+import { verificarExcesoPorCategoria } from './budgetService';
 
 // Crear una nueva transacción
 export const crearTransaccion = async (usuarioId, tipo, monto, categoria, descripcion, fecha = null) => {
@@ -29,10 +30,25 @@ export const crearTransaccion = async (usuarioId, tipo, monto, categoria, descri
 
     const result = await db.runAsync(query, values);
 
+    // Si es un gasto, verificar si excede el presupuesto
+    let alertaPresupuesto = null;
+    if (tipo === 'GASTO') {
+      const fechaTransaccion = fecha ? new Date(fecha) : new Date();
+      const mes = fechaTransaccion.getMonth() + 1;
+      const anio = fechaTransaccion.getFullYear();
+      
+      const verificacion = await verificarExcesoPorCategoria(usuarioId, categoria, mes, anio);
+      
+      if (verificacion.success && (verificacion.excedido || verificacion.porcentajeUsado >= 80)) {
+        alertaPresupuesto = verificacion.mensaje;
+      }
+    }
+
     return { 
       success: true, 
       message: 'Transacción creada exitosamente',
-      transaccionId: result.lastInsertRowId 
+      transaccionId: result.lastInsertRowId,
+      alertaPresupuesto
     };
   } catch (error) {
     console.error('Error al crear transacción:', error);

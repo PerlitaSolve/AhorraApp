@@ -51,23 +51,51 @@ export default function CrearTrans({ volver, usuarioId, onTransaccionCreada, nav
       );
 
       if (resultado.success) {
-        Alert.alert('Éxito', 'Transacción creada correctamente');
-        // Limpiar campos
-        setMonto('');
-        setCategoria('');
-        setDescripcion('');
-        setTipo('GASTO');
-        
-        // Notificar que se creó la transacción
-        if (onTransaccionCreada) {
-          onTransaccionCreada();
-        }
-        
-        // Volver a la pantalla anterior
-        if (navigation?.goBack) {
-          navigation.goBack();
-        } else if (volver) {
-          volver();
+        // Si hay alerta de presupuesto, mostrarla primero
+        if (resultado.alertaPresupuesto) {
+          Alert.alert('⚠️ Alerta de Presupuesto', resultado.alertaPresupuesto, [
+            { 
+              text: 'Entendido', 
+              onPress: () => {
+                // Limpiar campos
+                setMonto('');
+                setCategoria('');
+                setDescripcion('');
+                setTipo('GASTO');
+                
+                // Notificar que se creó la transacción
+                if (onTransaccionCreada) {
+                  onTransaccionCreada();
+                }
+                
+                // Volver a la pantalla anterior
+                if (navigation?.goBack) {
+                  navigation.goBack();
+                } else if (volver) {
+                  volver();
+                }
+              }
+            }
+          ]);
+        } else {
+          Alert.alert('Éxito', 'Transacción creada correctamente');
+          // Limpiar campos
+          setMonto('');
+          setCategoria('');
+          setDescripcion('');
+          setTipo('GASTO');
+          
+          // Notificar que se creó la transacción
+          if (onTransaccionCreada) {
+            onTransaccionCreada();
+          }
+          
+          // Volver a la pantalla anterior
+          if (navigation?.goBack) {
+            navigation.goBack();
+          } else if (volver) {
+            volver();
+          }
         }
       } else {
         Alert.alert('Error', resultado.message);

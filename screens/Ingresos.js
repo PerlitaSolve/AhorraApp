@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, Button, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 import { Dimensions } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../context/UserContext';
 import { obtenerTransaccionesFiltradas } from '../services/transactionService';
 import MenuLateral from './MenuLateral';
@@ -93,11 +93,20 @@ export default function Ingresos({ navigation, volver }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {volver && (
-        <TouchableOpacity onPress={volver} style={styles.backButton}>
-          <Text style={styles.backArrow}>←</Text>
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity 
+        style={styles.logoButton}
+        onPress={() => navigation.navigate('Home')}
+      >
+        <Image source={require('../assets/L-SFon.png')} style={styles.logoIcon} />
+      </TouchableOpacity>
+      
+      <TouchableOpacity 
+        style={styles.menuButton}
+        onPress={() => navigation.navigate('MenuLateral')}
+      >
+        <Ionicons name="menu" size={28} color="#1D617A" />
+      </TouchableOpacity>
+      
       <View style={styles.header}>
         <View style={styles.tabsContainer}>
           <TouchableOpacity style={[styles.tab, styles.inactiveTab]} onPress={() => navigation.navigate('Gastos')}>
@@ -108,13 +117,6 @@ export default function Ingresos({ navigation, volver }) {
           </TouchableOpacity>
         </View>
       </View>
-
-      <TouchableOpacity 
-        style={styles.menuButton}
-        onPress={() => setMenuVisible(!menuVisible)}
-      >
-        <MaterialCommunityIcons name="menu" size={28} color="#357D8B" />
-      </TouchableOpacity>
 
       <ScrollView style={styles.content}>
         <View style={styles.timeFilter}>
@@ -224,11 +226,23 @@ const styles = StyleSheet.create({
     padding: 20, 
     paddingBottom: 50, 
   },
-  menuButton: {
+  logoButton: {
     position: 'absolute',
     top: 50,
     left: 20,
-    zIndex: 50,
+    zIndex: 10,
+    padding: 10,
+  },
+  logoIcon: {
+    width: 40,
+    height: 40,
+    resizeMode: 'contain',
+  },
+  menuButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 10,
     padding: 10,
   },
   tabsContainer: { 
@@ -370,6 +384,18 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     marginTop: 20,
     marginBottom: 15,
+  },
+  logoButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+    padding: 10,
+  },
+  logoIcon: {
+    width: 40,
+    height: 40,
+    resizeMode: 'contain',
   },
   backButton: { 
     position: 'absolute', 

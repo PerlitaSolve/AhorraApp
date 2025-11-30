@@ -20,14 +20,18 @@ const navigateToDetails = (screen) => {
 };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
-        {volver && (
-          <TouchableOpacity onPress={volver} style={styles.backButtonTop}>
-            <Text style={styles.backArrow}>←</Text>
+    <View style={styles.overlay}>
+      <TouchableOpacity 
+        style={styles.backdrop} 
+        onPress={() => navigation?.goBack()} 
+        activeOpacity={1}
+      />
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView style={styles.container}>
+          <TouchableOpacity onPress={() => navigation?.goBack()} style={styles.closeButton}>
+            <MaterialCommunityIcons name="close" size={28} color="#333" />
           </TouchableOpacity>
-        )}
-        <Text style={styles.headerTitle}>Menú Lateral</Text>
+          <Text style={styles.headerTitle}>Menú</Text>
 
         <View style={styles.profileCard}>
         <View style={styles.profileInfo}>
@@ -62,16 +66,36 @@ const navigateToDetails = (screen) => {
         </TouchableOpacity> 
       </ScrollView>
     </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-    safeArea: {
+    overlay: {
         flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+    },
+    backdrop: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    safeArea: {
+        width: 280,
         backgroundColor: '#f5f5f5',
+        shadowColor: '#000',
+        shadowOffset: { width: -2, height: 0 },
+        shadowOpacity: 0.25,
+        shadowRadius: 5,
+        elevation: 5,
     },
     container: {
         padding: 20,
+    },
+    closeButton: {
+        alignSelf: 'flex-end',
+        padding: 8,
+        marginBottom: 10,
     },
     headerTitle: {
         fontSize: 28,

@@ -3,12 +3,14 @@ import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { obtenerTransacciones, eliminarTransaccion, obtenerTransaccionesFiltradas, obtenerCategorias } from '../services/transactionService'
 import { initDatabase } from '../services/database'
+import { useUser } from '../context/UserContext'
 import CrearTrans from './CrearTrans'
 import EditarTrans from './EditarTrans'
 
 
 
-export default function Transacciones({ volver, usuarioId, onEditarTransaccion, navigation }) {
+export default function Transacciones({ volver, onEditarTransaccion, navigation }) {
+    const { usuario } = useUser();
     const [transacciones, setTransacciones] = useState([]);
     const [loading, setLoading] = useState(true);
     const [mostrarCrear, setMostrarCrear] = useState(false);
@@ -22,15 +24,18 @@ export default function Transacciones({ volver, usuarioId, onEditarTransaccion, 
         fechaFin: '',
         tipo: ''
     });
+    const [ordenFecha, setOrdenFecha] = useState('reciente'); // 'reciente' o 'antiguo'
 
     useEffect(() => {
         initDatabase();
-        cargarTransacciones();
-        cargarCategorias();
-    }, []);
+        if (usuario?.id) {
+            cargarTransacciones();
+            cargarCategorias();
+        }
+    }, [usuario?.id]);
 
     const cargarTransacciones = async () => {
-        if (!usuarioId) {
+        if (!usuario?.id) {
             Alert.alert('Error', 'Debes iniciar sesión');
             setLoading(false);
             return;
@@ -38,7 +43,7 @@ export default function Transacciones({ volver, usuarioId, onEditarTransaccion, 
 
         setLoading(true);
         try {
-            const resultado = await obtenerTransacciones(usuarioId);
+            const resultado = await obtenerTransacciones(usuario.id);
             if (resultado.success) {
                 setTransacciones(resultado.transacciones);
             } else {
@@ -53,10 +58,10 @@ export default function Transacciones({ volver, usuarioId, onEditarTransaccion, 
     };
 
     const cargarCategorias = async () => {
-        if (!usuarioId) return;
+        if (!usuario.id) return;
         
         try {
-            const resultado = await obtenerCategorias(usuarioId);
+            const resultado = await obtenerCategorias(usuario.id);
             if (resultado.success) {
                 setCategorias(resultado.categorias);
             }
@@ -66,7 +71,7 @@ export default function Transacciones({ volver, usuarioId, onEditarTransaccion, 
     };
 
     const aplicarFiltros = async () => {
-        if (!usuarioId) return;
+        if (!usuario.id) return;
 
         setLoading(true);
         try {
@@ -76,9 +81,15 @@ export default function Transacciones({ volver, usuarioId, onEditarTransaccion, 
             if (filtros.fechaInicio) filtrosLimpios.fechaInicio = filtros.fechaInicio;
             if (filtros.fechaFin) filtrosLimpios.fechaFin = filtros.fechaFin;
 
-            const resultado = await obtenerTransaccionesFiltradas(usuarioId, filtrosLimpios);
+            const resultado = await obtenerTransaccionesFiltradas(usuario.id, filtrosLimpios);
             if (resultado.success) {
-                setTransacciones(resultado.transacciones);
+                // Ordenar por fecha
+                const transaccionesOrdenadas = [...resultado.transacciones].sort((a, b) => {
+                    const fechaA = new Date(a.fecha).getTime();
+                    const fechaB = new Date(b.fecha).getTime();
+                    return ordenFecha === 'reciente' ? fechaB - fechaA : fechaA - fechaB;
+                });
+                setTransacciones(transaccionesOrdenadas);
                 setMostrarFiltros(false);
             } else {
                 Alert.alert('Error', resultado.message);
@@ -92,6 +103,7 @@ export default function Transacciones({ volver, usuarioId, onEditarTransaccion, 
     };
 
     const limpiarFiltros = () => {
+        setOrdenFecha('reciente');
         setFiltros({
             categoria: '',
             fechaInicio: '',
@@ -114,7 +126,7 @@ export default function Transacciones({ volver, usuarioId, onEditarTransaccion, 
 
     const eliminarTransaccionHandler = async (transaccionId) => {
         try {
-            const resultado = await eliminarTransaccion(transaccionId, usuarioId);
+            const resultado = await eliminarTransaccion(transaccionId, usuario.id);
             if (resultado.success) {
                 Alert.alert('Éxito', 'Transacción eliminada');
                 cargarTransacciones();
@@ -173,7 +185,7 @@ export default function Transacciones({ volver, usuarioId, onEditarTransaccion, 
                     setMostrarCrear(false);
                     cargarTransacciones();
                 }} 
-                usuarioId={usuarioId}
+                usuarioId={usuario?.id}
                 onTransaccionCreada={cargarTransacciones}
             />
         );
@@ -187,7 +199,7 @@ export default function Transacciones({ volver, usuarioId, onEditarTransaccion, 
                     setTransaccionEditando(null);
                     cargarTransacciones();
                 }} 
-                usuarioId={usuarioId}
+                usuarioId={usuario?.id}
                 transaccion={transaccionEditando}
                 onTransaccionEditada={cargarTransacciones}
             />
@@ -213,7 +225,7 @@ export default function Transacciones({ volver, usuarioId, onEditarTransaccion, 
                             <Text style={styles.botonTexto}>Añadir +</Text>
                         </Pressable>
                         <Pressable style={styles.botonFiltros} onPress={() => setMostrarFiltros(true)}>
-                            <Text style={styles.botonTexto}>Filtros</Text>
+                            <Text style={styles.botonTexto}>Filtrar por</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -254,47 +266,56 @@ export default function Transacciones({ volver, usuarioId, onEditarTransaccion, 
             >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitulo}>Filtros de Transacciones</Text>
+                        <Text style={styles.modalTitulo}>Filtrar por</Text>
                         
-                        <Text style={styles.labelFiltro}>Tipo:</Text>
-                        <View style={{flexDirection: 'row', gap: 10, marginBottom: 15}}>
-                            <TouchableOpacity 
-                                style={[styles.filtroBtn, filtros.tipo === 'INGRESO' && styles.filtroBtnActivo]}
-                                onPress={() => setFiltros({...filtros, tipo: filtros.tipo === 'INGRESO' ? '' : 'INGRESO'})}
-                            >
-                                <Text>INGRESO</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity 
-                                style={[styles.filtroBtn, filtros.tipo === 'GASTO' && styles.filtroBtnActivo]}
-                                onPress={() => setFiltros({...filtros, tipo: filtros.tipo === 'GASTO' ? '' : 'GASTO'})}
-                            >
-                                <Text>GASTO</Text>
-                            </TouchableOpacity>
+                        {/* Sección: Ordenar por Fecha */}
+                        <View style={styles.seccionFiltro}>
+                            <Text style={styles.subtituloFiltro}>Ordenar por Fecha</Text>
+                            
+                            <View style={{flexDirection: 'row', gap: 10, marginBottom: 10}}>
+                                <TouchableOpacity 
+                                    style={[styles.filtroBtn, ordenFecha === 'reciente' && styles.filtroBtnActivo]}
+                                    onPress={() => setOrdenFecha('reciente')}
+                                >
+                                    <Text style={ordenFecha === 'reciente' && {fontWeight: 'bold'}}>Más Reciente</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity 
+                                    style={[styles.filtroBtn, ordenFecha === 'antiguo' && styles.filtroBtnActivo]}
+                                    onPress={() => setOrdenFecha('antiguo')}
+                                >
+                                    <Text style={ordenFecha === 'antiguo' && {fontWeight: 'bold'}}>Más Antiguo</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
-                        <Text style={styles.labelFiltro}>Categoría:</Text>
-                        <TextInput
-                            style={styles.inputFiltro}
-                            placeholder="Categoría"
-                            value={filtros.categoria}
-                            onChangeText={(text) => setFiltros({...filtros, categoria: text})}
-                        />
+                        {/* Sección: Filtrar por Categoría */}
+                        <View style={styles.seccionFiltro}>
+                            <Text style={styles.subtituloFiltro}>Filtrar por Categoría</Text>
+                            
+                            <Text style={styles.labelFiltro}>Tipo:</Text>
+                            <View style={{flexDirection: 'row', gap: 10, marginBottom: 15}}>
+                                <TouchableOpacity 
+                                    style={[styles.filtroBtn, filtros.tipo === 'INGRESO' && styles.filtroBtnActivo]}
+                                    onPress={() => setFiltros({...filtros, tipo: filtros.tipo === 'INGRESO' ? '' : 'INGRESO'})}
+                                >
+                                    <Text style={filtros.tipo === 'INGRESO' && {fontWeight: 'bold'}}>INGRESO</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity 
+                                    style={[styles.filtroBtn, filtros.tipo === 'GASTO' && styles.filtroBtnActivo]}
+                                    onPress={() => setFiltros({...filtros, tipo: filtros.tipo === 'GASTO' ? '' : 'GASTO'})}
+                                >
+                                    <Text style={filtros.tipo === 'GASTO' && {fontWeight: 'bold'}}>GASTO</Text>
+                                </TouchableOpacity>
+                            </View>
 
-                        <Text style={styles.labelFiltro}>Fecha Inicio (YYYY-MM-DD):</Text>
-                        <TextInput
-                            style={styles.inputFiltro}
-                            placeholder="2024-01-01"
-                            value={filtros.fechaInicio}
-                            onChangeText={(text) => setFiltros({...filtros, fechaInicio: text})}
-                        />
-
-                        <Text style={styles.labelFiltro}>Fecha Fin (YYYY-MM-DD):</Text>
-                        <TextInput
-                            style={styles.inputFiltro}
-                            placeholder="2024-12-31"
-                            value={filtros.fechaFin}
-                            onChangeText={(text) => setFiltros({...filtros, fechaFin: text})}
-                        />
+                            <Text style={styles.labelFiltro}>Categoría:</Text>
+                            <TextInput
+                                style={styles.inputFiltro}
+                                placeholder="Ej: Comida, Transporte"
+                                value={filtros.categoria}
+                                onChangeText={(text) => setFiltros({...filtros, categoria: text})}
+                            />
+                        </View>
 
                         <View style={{flexDirection: 'row', gap: 10, marginTop: 20}}>
                             <Pressable style={styles.botonModalAplicar} onPress={aplicarFiltros}>
@@ -436,6 +457,20 @@ export const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 20,
         textAlign: 'center',
+        color: '#1D617A',
+    },
+    seccionFiltro: {
+        backgroundColor: '#f8f9fa',
+        borderRadius: 8,
+        padding: 15,
+        marginBottom: 15,
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+    },
+    subtituloFiltro: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 12,
         color: '#1D617A',
     },
     labelFiltro: {

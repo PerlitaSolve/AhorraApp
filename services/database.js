@@ -60,6 +60,23 @@ export const initDatabase = async () => {
       `);
       
       console.log('Tabla transacciones creada');
+      
+      // Crear tabla de presupuestos
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS presupuestos (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          usuario_id INTEGER NOT NULL,
+          categoria TEXT NOT NULL,
+          monto REAL NOT NULL,
+          periodo TEXT NOT NULL CHECK(periodo IN ('MENSUAL', 'ANUAL')),
+          mes INTEGER,
+          anio INTEGER NOT NULL,
+          fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+        );
+      `);
+      
+      console.log('Tabla presupuestos creada');
       console.log('Base de datos inicializada correctamente');
       
       isInitializing = false;

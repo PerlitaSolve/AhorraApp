@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
 
 // Screens
 import Autenticacion from './screens/Autenticacion';
@@ -24,6 +26,72 @@ import { UserProvider } from './context/UserContext';
 import { initDatabase } from './services/database';
 
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
+
+function HomeTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: '#1D617A',
+        tabBarInactiveTintColor: '#8E8E93',
+        tabBarStyle: {
+          backgroundColor: '#fff',
+          borderTopWidth: 1,
+          borderTopColor: '#E5E5EA',
+          height: 85,
+          paddingBottom: 25,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
+      }}
+    >
+      <Tab.Screen 
+        name="Ingresos" 
+        component={Ingresos}
+        options={{
+          tabBarLabel: 'Ingresos',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="arrow-down-circle" size={26} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="Gastos" 
+        component={Gastos}
+        options={{
+          tabBarLabel: 'Gastos',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="arrow-up-circle" size={26} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="Transacciones" 
+        component={Transacciones}
+        options={{
+          tabBarLabel: 'Historial',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="list" size={26} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="Presupuestos" 
+        component={Presupuesto1}
+        options={{
+          tabBarLabel: 'Presupuestos',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="wallet" size={26} color={color} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
 
 // 2. Main: Zona de componentes
 export default function App() {
@@ -91,17 +159,7 @@ export default function App() {
           />
           <Stack.Screen 
             name="Home" 
-            component={Ingresos} 
-            options={{ headerShown: false }} 
-          />
-          <Stack.Screen 
-            name="Ingresos" 
-            component={Ingresos} 
-            options={{ headerShown: false }} 
-          />
-          <Stack.Screen 
-            name="Gastos" 
-            component={Gastos} 
+            component={HomeTabs} 
             options={{ headerShown: false }} 
           />
           <Stack.Screen 
@@ -110,18 +168,8 @@ export default function App() {
             options={{ headerShown: false }} 
           />
           <Stack.Screen 
-            name="Transacciones" 
-            component={Transacciones} 
-            options={{ headerShown: false }} 
-          />
-          <Stack.Screen 
             name="Notificaciones" 
             component={Notificaciones} 
-            options={{ headerShown: false }} 
-          />
-          <Stack.Screen 
-            name="Presupuesto1" 
-            component={Presupuesto1} 
             options={{ headerShown: false }} 
           />
           <Stack.Screen 
@@ -137,7 +185,11 @@ export default function App() {
           <Stack.Screen 
             name="MenuLateral" 
             component={MenuLateral} 
-            options={{ headerShown: false }} 
+            options={{ 
+              headerShown: false,
+              presentation: 'transparentModal',
+              animation: 'slide_from_right',
+            }} 
           />
           <Stack.Screen 
             name="CrearTrans" 

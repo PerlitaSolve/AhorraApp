@@ -1,238 +1,388 @@
-import { Text, StyleSheet, View, StatusBar, ScrollView, TouchableOpacity, Image } from 'react-native';
-import React, { useState } from 'react';
+import { Text, StyleSheet, View, StatusBar, ScrollView, TouchableOpacity, Image, Alert, TextInput, Modal, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { useUser } from '../context/UserContext';
+import { 
+  crearPresupuesto, 
+  obtenerPresupuestos, 
+  actualizarPresupuesto, 
+  eliminarPresupuesto,
+  obtenerResumenPresupuestos 
+} from '../services/budgetService';
 
 export default function Presupuesto1({ navigation, volver }) {
+  const { usuario } = useUser();
+  const [presupuestos, setPresupuestos] = useState([]);
+  const [resumen, setResumen] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editando, setEditando] = useState(null);
+  
+  // Formulario
+  const [categoria, setCategoria] = useState('');
+  const [monto, setMonto] = useState('');
+  const [periodo, setPeriodo] = useState('MENSUAL');
+  const [mes, setMes] = useState(new Date().getMonth() + 1);
+  const [anio, setAnio] = useState(new Date().getFullYear());
 
-    const [categorias, setCategorias] = useState([
-        { id: 1, nombre: 'ALIMENTACIÓN', monto: '3,500' },
-        { id: 2, nombre: 'EDUCACIÓN', monto: '5,000' },
-        { id: 3, nombre: 'TRANSPORTE', monto: '600' },
-        { id: 4, nombre: 'SERVICIOS', monto: '1,300' },
-        { id: 5, nombre: 'SALUD', monto: '2,000' },
-    ]);
+  useEffect(() => {
+    if (usuario?.id) {
+      cargarPresupuestos();
+      cargarResumen();
+    }
+  }, [usuario?.id]);
 
-    const handleEdit = (id) => {
-        console.log('Editar categoría:', id);
-        // navigation?.navigate('EditarCategoria', { categoriaId: id });
-    };
+  const cargarPresupuestos = async () => {
+    setLoading(true);
+    try {
+      const resultado = await obtenerPresupuestos(usuario.id);
+      if (resultado.success) {
+        setPresupuestos(resultado.presupuestos);
+      }
+    } catch (error) {
+      console.error('Error al cargar presupuestos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleDelete = (id) => {
-        setCategorias(categorias.filter(cat => cat.id !== id));
-    };
+  const cargarResumen = async () => {
+    try {
+      const fechaActual = new Date();
+      const resultado = await obtenerResumenPresupuestos(
+        usuario.id,
+        fechaActual.getMonth() + 1,
+        fechaActual.getFullYear()
+      );
+      if (resultado.success) {
+        setResumen(resultado.resumen);
+      }
+    } catch (error) {
+      console.error('Error al cargar resumen:', error);
+    }
+  };
 
-    const handleAgregarCategoria = () => {
-        console.log('Agregar nueva categoría');
-        // navigation?.navigate('AgregarCategoria');
-    };
+  const abrirModal = (presupuesto = null) => {
+    if (presupuesto) {
+      setEditando(presupuesto);
+      setCategoria(presupuesto.categoria);
+      setMonto(presupuesto.monto.toString());
+      setPeriodo(presupuesto.periodo);
+      setMes(presupuesto.mes || new Date().getMonth() + 1);
+      setAnio(presupuesto.anio);
+    } else {
+      setEditando(null);
+      setCategoria('');
+      setMonto('');
+      setPeriodo('MENSUAL');
+      setMes(new Date().getMonth() + 1);
+      setAnio(new Date().getFullYear());
+    }
+    setModalVisible(true);
+  };
 
-    return (
-        <View style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor="#1D617A" />
-            
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => volver ? volver() : navigation?.goBack()} style={styles.backButton}>
-                    <Text style={styles.backArrow}>←</Text>
+  const cerrarModal = () => {
+    setModalVisible(false);
+    setEditando(null);
+    setCategoria('');
+    setMonto('');
+    setPeriodo('MENSUAL');
+  };
+
+  const guardarPresupuesto = async () => {
+    if (!categoria || !monto || !anio) {
+      Alert.alert('Error', 'Todos los campos son obligatorios');
+      return;
+    }
+
+    if (isNaN(monto) || parseFloat(monto) <= 0) {
+      Alert.alert('Error', 'El monto debe ser un número válido mayor a 0');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      let resultado;
+      if (editando) {
+        resultado = await actualizarPresupuesto(
+          editando.id,
+          parseFloat(monto),
+          categoria,
+          periodo,
+          periodo === 'MENSUAL' ? mes : null,
+          anio
+        );
+      } else {
+        resultado = await crearPresupuesto(
+          usuario.id,
+          categoria,
+          parseFloat(monto),
+          periodo,
+          periodo === 'MENSUAL' ? mes : null,
+          anio
+        );
+      }
+
+      if (resultado.success) {
+        Alert.alert('Éxito', resultado.message);
+        cerrarModal();
+        cargarPresupuestos();
+        cargarResumen();
+      } else {
+        Alert.alert('Error', resultado.message);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Ocurrió un error al guardar el presupuesto');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEliminar = (id) => {
+    Alert.alert(
+      'Confirmar eliminación',
+      '¿Estás seguro de que deseas eliminar este presupuesto?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            const resultado = await eliminarPresupuesto(id);
+            if (resultado.success) {
+              Alert.alert('Éxito', 'Presupuesto eliminado');
+              cargarPresupuestos();
+              cargarResumen();
+            } else {
+              Alert.alert('Error', resultado.message);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#1D617A" />
+      
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation?.navigate('Home')} style={styles.logoButton}>
+          <Image source={require('../assets/L-SFon.png')} style={styles.logoIcon} />
+        </TouchableOpacity>
+        <Text style={styles.titulo}>PRESUPUESTOS</Text>
+        <TouchableOpacity style={styles.menuButton} onPress={() => navigation?.navigate('MenuLateral')}>
+          <Text style={styles.menuIcon}>☰</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView style={styles.content}>
+        {resumen.length > 0 && (
+          <View style={styles.resumenContainer}>
+            <Text style={styles.resumenTitulo}>Resumen del mes actual</Text>
+            {resumen.map((item, index) => (
+              <View key={index} style={styles.resumenItem}>
+                <Text style={styles.resumenCategoria}>{item.categoria}</Text>
+                <Text style={styles.resumenDetalle}>
+                  ${item.gastado?.toFixed(2) || 0} / ${item.presupuesto?.toFixed(2) || 0}
+                </Text>
+                <View style={styles.progressBar}>
+                  <View 
+                    style={[
+                      styles.progressFill, 
+                      { 
+                        width: `${Math.min(item.porcentajeUsado || 0, 100)}%`,
+                        backgroundColor: item.excedido ? '#d32f2f' : item.porcentajeUsado >= 80 ? '#ff9800' : '#4caf50'
+                      }
+                    ]} 
+                  />
+                </View>
+                <Text style={[
+                  styles.resumenPorcentaje,
+                  { color: item.excedido ? '#d32f2f' : item.porcentajeUsado >= 80 ? '#ff9800' : '#666' }
+                ]}>
+                  {item.porcentajeUsado}% usado
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        <Text style={styles.listaTitulo}>Mis Presupuestos</Text>
+        
+        {loading && presupuestos.length === 0 ? (
+          <ActivityIndicator size="large" color="#1D617A" style={{ marginTop: 20 }} />
+        ) : presupuestos.length === 0 ? (
+          <Text style={styles.emptyText}>No tienes presupuestos registrados</Text>
+        ) : (
+          presupuestos.map((item) => (
+            <View key={item.id} style={styles.presupuestoCard}>
+              <View style={styles.presupuestoInfo}>
+                <Text style={styles.presupuestoCategoria}>{item.categoria}</Text>
+                <Text style={styles.presupuestoMonto}>$ {item.monto.toFixed(2)}</Text>
+                <Text style={styles.presupuestoPeriodo}>
+                  {item.periodo === 'MENSUAL' ? `${meses[item.mes - 1]} ${item.anio}` : `Anual ${item.anio}`}
+                </Text>
+              </View>
+              <View style={styles.presupuestoAcciones}>
+                <TouchableOpacity onPress={() => abrirModal(item)} style={styles.btnEditar}>
+                  <Text style={styles.btnEditarText}>✎</Text>
                 </TouchableOpacity>
-                <Image 
-                    source={require('../assets/logo.png')} 
-                    style={styles.logo}
-                    resizeMode="contain"
-                />
-                <Text style={styles.titulo}>AHORRA + APP</Text>
-                <TouchableOpacity style={styles.menuButton}>
-                    <Text style={styles.menuIcon}>☰</Text>
+                <TouchableOpacity onPress={() => handleEliminar(item.id)} style={styles.btnEliminar}>
+                  <Text style={styles.btnEliminarText}>✕</Text>
                 </TouchableOpacity>
+              </View>
+            </View>
+          ))
+        )}
+
+        <TouchableOpacity style={styles.btnAgregar} onPress={() => abrirModal()}>
+          <Text style={styles.btnAgregarText}>+ Agregar Presupuesto</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={cerrarModal}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitulo}>
+              {editando ? 'Editar Presupuesto' : 'Nuevo Presupuesto'}
+            </Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Categoría"
+              value={categoria}
+              onChangeText={setCategoria}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Monto"
+              value={monto}
+              onChangeText={setMonto}
+              keyboardType="decimal-pad"
+            />
+
+            <View style={styles.periodoContainer}>
+              <TouchableOpacity
+                style={[styles.periodoBtn, periodo === 'MENSUAL' && styles.periodoBtnActive]}
+                onPress={() => setPeriodo('MENSUAL')}
+              >
+                <Text style={[styles.periodoBtnText, periodo === 'MENSUAL' && styles.periodoBtnTextActive]}>
+                  Mensual
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.periodoBtn, periodo === 'ANUAL' && styles.periodoBtnActive]}
+                onPress={() => setPeriodo('ANUAL')}
+              >
+                <Text style={[styles.periodoBtnText, periodo === 'ANUAL' && styles.periodoBtnTextActive]}>
+                  Anual
+                </Text>
+              </TouchableOpacity>
             </View>
 
-            {/* Título de la sección */}
-            <Text style={styles.subtitulo}>"PRESUPUESTO"</Text>
+            {periodo === 'MENSUAL' && (
+              <View style={styles.fechaContainer}>
+                <TextInput
+                  style={[styles.input, { flex: 1, marginRight: 10 }]}
+                  placeholder="Mes (1-12)"
+                  value={mes.toString()}
+                  onChangeText={(text) => setMes(parseInt(text) || 1)}
+                  keyboardType="number-pad"
+                />
+                <TextInput
+                  style={[styles.input, { flex: 1 }]}
+                  placeholder="Año"
+                  value={anio.toString()}
+                  onChangeText={(text) => setAnio(parseInt(text) || new Date().getFullYear())}
+                  keyboardType="number-pad"
+                />
+              </View>
+            )}
 
-            {/* Contenedor principal */}
-            <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
-                <View style={styles.presupuestoContainer}>
-                    
-                    {/* Encabezados */}
-                    <View style={styles.headerRow}>
-                        <Text style={styles.headerText}>CATEGORÍA</Text>
-                        <Text style={styles.headerText}>MONTO</Text>
-                    </View>
+            {periodo === 'ANUAL' && (
+              <TextInput
+                style={styles.input}
+                placeholder="Año"
+                value={anio.toString()}
+                onChangeText={(text) => setAnio(parseInt(text) || new Date().getFullYear())}
+                keyboardType="number-pad"
+              />
+            )}
 
-                    {/* Lista de categorías */}
-                    {categorias.map((categoria) => (
-                        <View key={categoria.id} style={styles.categoriaRow}>
-                            <Text style={styles.categoriaNombre}>{categoria.nombre}</Text>
-                            <View style={styles.montoContainer}>
-                                <Text style={styles.categoriaMontoTexto}>$ {categoria.monto} MX</Text>
-                                <TouchableOpacity 
-                                    onPress={() => handleEdit(categoria.id)}
-                                    style={styles.iconButton}
-                                >
-                                    <Text style={styles.editIcon}>✏️</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity 
-                                    onPress={() => handleDelete(categoria.id)}
-                                    style={styles.iconButton}
-                                >
-                                    <Text style={styles.deleteIcon}>🗑️</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    ))}
-
-                    {/* Botón Agregar Categoría */}
-                    <TouchableOpacity 
-                        style={styles.agregarButton}
-                        onPress={handleAgregarCategoria}
-                    >
-                        <Text style={styles.agregarButtonText}>Agregar Categoría</Text>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.btnCancelar} onPress={cerrarModal}>
+                <Text style={styles.btnCancelarText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.btnGuardar} onPress={guardarPresupuesto} disabled={loading}>
+                {loading ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.btnGuardarText}>Guardar</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-    );
+      </Modal>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#1D617A',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingTop: 50,
-        paddingHorizontal: 20,
-        paddingBottom: 10,
-    },
-    backButton: {
-        marginRight: 10,
-    },
-    backArrow: {
-        fontSize: 30,
-        color: 'white',
-        fontWeight: 'bold',
-    },
-    logo: {
-        width: 40,
-        height: 40,
-        marginRight: 10,
-    },
-    titulo: {
-        fontFamily: 'Times New Roman',
-        fontSize: 24,
-        color: 'white',
-        fontStyle: 'italic',
-        fontWeight: 'bold',
-        flex: 1,
-    },
-    menuButton: {
-        padding: 5,
-    },
-    menuIcon: {
-        fontSize: 28,
-        color: 'white',
-        fontWeight: 'bold',
-    },
-    subtitulo: {
-        fontFamily: 'Times New Roman',
-        fontSize: 22,
-        color: 'white',
-        textAlign: 'center',
-        marginTop: 20,
-        marginBottom: 30,
-        fontWeight: '600',
-    },
-    scrollContainer: {
-        flex: 1,
-    },
-    scrollContent: {
-        paddingHorizontal: 20,
-        paddingBottom: 30,
-    },
-    presupuestoContainer: {
-        backgroundColor: '#E8F4F8',
-        borderRadius: 15,
-        padding: 20,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingBottom: 15,
-        borderBottomWidth: 2,
-        borderBottomColor: '#1D617A',
-        marginBottom: 15,
-    },
-    headerText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#1D617A',
-        flex: 1,
-        textAlign: 'center',
-    },
-    categoriaRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: '#D0D0D0',
-    },
-    categoriaNombre: {
-        fontSize: 15,
-        color: '#2D3748',
-        fontWeight: '600',
-        flex: 1,
-    },
-    montoContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-        justifyContent: 'flex-end',
-    },
-    categoriaMontoTexto: {
-        fontSize: 15,
-        color: '#2D3748',
-        fontWeight: '500',
-        marginRight: 10,
-    },
-    iconButton: {
-        marginLeft: 8,
-        padding: 5,
-    },
-    editIcon: {
-        fontSize: 20,
-    },
-    deleteIcon: {
-        fontSize: 20,
-    },
-    agregarButton: {
-        backgroundColor: '#A8D5E2',
-        borderRadius: 10,
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        marginTop: 20,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.2,
-        shadowRadius: 1.41,
-        elevation: 2,
-    },
-    agregarButtonText: {
-        fontSize: 16,
-        color: '#1D617A',
-        fontWeight: '600',
-    },
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  header: { backgroundColor: '#1D617A', paddingTop: 50, paddingBottom: 20, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  logoButton: { padding: 5 },
+  logoIcon: { width: 35, height: 35, resizeMode: 'contain' },
+  backButton: { padding: 5 },
+  backArrow: { fontSize: 28, color: 'white', fontWeight: 'bold' },
+  titulo: { fontSize: 20, fontWeight: 'bold', color: 'white' },
+  menuButton: { padding: 5 },
+  menuIcon: { fontSize: 24, color: 'white' },
+  content: { flex: 1, padding: 20 },
+  resumenContainer: { backgroundColor: 'white', borderRadius: 10, padding: 15, marginBottom: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
+  resumenTitulo: { fontSize: 18, fontWeight: 'bold', color: '#1D617A', marginBottom: 15 },
+  resumenItem: { marginBottom: 15 },
+  resumenCategoria: { fontSize: 16, fontWeight: '600', color: '#333', marginBottom: 5 },
+  resumenDetalle: { fontSize: 14, color: '#666', marginBottom: 5 },
+  progressBar: { height: 8, backgroundColor: '#e0e0e0', borderRadius: 4, overflow: 'hidden', marginBottom: 5 },
+  progressFill: { height: '100%' },
+  resumenPorcentaje: { fontSize: 12, fontWeight: '600' },
+  listaTitulo: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 15 },
+  emptyText: { textAlign: 'center', color: '#999', fontSize: 16, marginTop: 20 },
+  presupuestoCard: { backgroundColor: 'white', borderRadius: 10, padding: 15, marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
+  presupuestoInfo: { flex: 1 },
+  presupuestoCategoria: { fontSize: 16, fontWeight: 'bold', color: '#333' },
+  presupuestoMonto: { fontSize: 18, color: '#1D617A', fontWeight: '600', marginTop: 5 },
+  presupuestoPeriodo: { fontSize: 12, color: '#999', marginTop: 3 },
+  presupuestoAcciones: { flexDirection: 'row', gap: 10 },
+  btnEditar: { backgroundColor: '#4caf50', width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
+  btnEditarText: { color: 'white', fontSize: 20 },
+  btnEliminar: { backgroundColor: '#f44336', width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
+  btnEliminarText: { color: 'white', fontSize: 20 },
+  btnAgregar: { backgroundColor: '#1D617A', padding: 15, borderRadius: 10, alignItems: 'center', marginTop: 20, marginBottom: 30 },
+  btnAgregarText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
+  modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
+  modalContent: { backgroundColor: 'white', borderRadius: 10, padding: 20, width: '90%', maxWidth: 400 },
+  modalTitulo: { fontSize: 20, fontWeight: 'bold', color: '#1D617A', marginBottom: 20, textAlign: 'center' },
+  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, marginBottom: 15, fontSize: 16 },
+  periodoContainer: { flexDirection: 'row', gap: 10, marginBottom: 15 },
+  periodoBtn: { flex: 1, padding: 12, borderWidth: 1, borderColor: '#1D617A', borderRadius: 8, alignItems: 'center' },
+  periodoBtnActive: { backgroundColor: '#1D617A' },
+  periodoBtnText: { color: '#1D617A', fontSize: 14, fontWeight: '600' },
+  periodoBtnTextActive: { color: 'white' },
+  fechaContainer: { flexDirection: 'row' },
+  modalButtons: { flexDirection: 'row', gap: 10, marginTop: 10 },
+  btnCancelar: { flex: 1, padding: 12, borderWidth: 1, borderColor: '#999', borderRadius: 8, alignItems: 'center' },
+  btnCancelarText: { color: '#666', fontSize: 16 },
+  btnGuardar: { flex: 1, padding: 12, backgroundColor: '#1D617A', borderRadius: 8, alignItems: 'center' },
+  btnGuardarText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
 });
