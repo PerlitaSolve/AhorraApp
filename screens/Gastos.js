@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Button, ActivityIndicator, Dimensions } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useUser } from '../context/UserContext';
 import { obtenerTransaccionesFiltradas, obtenerResumenTransacciones } from '../services/transactionService';
+import MenuLateral from './MenuLateral';
 
 const screenWidth = Dimensions.get('window').width - 40;
 
@@ -15,6 +17,7 @@ export default function Gastos({ navigation, volver }) {
   const [totalIngresos, setTotalIngresos] = useState(0);
   const [saldoDisponible, setSaldoDisponible] = useState(0);
   const [transacciones, setTransacciones] = useState([]);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const fechaActual = new Date();
   const mesActual = fechaActual.getMonth() + 1;
@@ -117,6 +120,13 @@ export default function Gastos({ navigation, volver }) {
         </View>
       </View>
 
+      <TouchableOpacity 
+        style={styles.menuButton}
+        onPress={() => setMenuVisible(!menuVisible)}
+      >
+        <MaterialCommunityIcons name="menu" size={28} color="#357D8B" />
+      </TouchableOpacity>
+
       <ScrollView style={styles.content}>
         <View style={styles.timeFilter}>
           <TouchableOpacity onPress={() => setPeriodo('Semana')}>
@@ -193,6 +203,21 @@ export default function Gastos({ navigation, volver }) {
           <Button title="Ir a Comparación" onPress={() => navigation.navigate('Comparacion')} />
         </View>
       </ScrollView>
+
+      {menuVisible && (
+        <View style={styles.menuOverlay}>
+          <TouchableOpacity 
+            style={styles.menuBackdrop}
+            onPress={() => setMenuVisible(false)}
+          />
+          <View style={styles.menuContent}>
+            <MenuLateral 
+              navigation={navigation}
+              volver={() => setMenuVisible(false)}
+            />
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -206,6 +231,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#004A77', 
     padding: 20, 
     paddingBottom: 50,
+  },
+  menuButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 50,
+    padding: 10,
   },
   headerText: { 
     color: '#FFF', 
@@ -381,5 +413,23 @@ const styles = StyleSheet.create({
   },
   navButtons: {
     marginBottom: 20,
+  },
+  menuOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    zIndex: 100,
+  },
+  menuBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  menuContent: {
+    width: '70%',
+    backgroundColor: '#FFF',
+    height: '100%',
   },
 });

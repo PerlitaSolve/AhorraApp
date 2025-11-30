@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, StatusBar, ScrollView, TouchableOpacity, Image, SafeAreaView, Dimensions, ActivityIndicator } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useUser } from '../context/UserContext';
 import { obtenerResumenTransacciones } from '../services/transactionService';
+import MenuLateral from './MenuLateral';
 
 const screenWidth = Dimensions.get('window').width - 40;
 
@@ -14,6 +16,7 @@ export default function Comparacion({ navigation, volver }) {
   const [datosGrafica, setDatosGrafica] = useState(null);
   const [resumen, setResumen] = useState({ ingresos: 0, gastos: 0, balance: 0 });
   const [alerta, setAlerta] = useState('');
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const mesesNombres = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
   const mesesCompletos = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
@@ -95,10 +98,14 @@ export default function Comparacion({ navigation, volver }) {
         )}
         <Image source={require('../assets/L-SFon.png')} style={styles.logo} />
         <Text style={styles.headerTitle}>AHORRA + APP</Text>
-        <TouchableOpacity onPress={() => navigation?.openDrawer && navigation.openDrawer('MenuLateral')} style={styles.hamburger}>
-          <Text style={{ color: '#fff', fontSize: 20 }}>≡</Text>
-        </TouchableOpacity>
       </View>
+
+      <TouchableOpacity 
+        style={styles.menuButton}
+        onPress={() => setMenuVisible(!menuVisible)}
+      >
+        <MaterialCommunityIcons name="menu" size={28} color="#357D8B" />
+      </TouchableOpacity>
 
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.sectionTitle}>"COMPARACIÓN DEL MES"</Text>
@@ -183,6 +190,21 @@ export default function Comparacion({ navigation, volver }) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {menuVisible && (
+        <View style={styles.menuOverlay}>
+          <TouchableOpacity 
+            style={styles.menuBackdrop}
+            onPress={() => setMenuVisible(false)}
+          />
+          <View style={styles.menuContent}>
+            <MenuLateral 
+              navigation={navigation}
+              volver={() => setMenuVisible(false)}
+            />
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -194,7 +216,13 @@ const styles = StyleSheet.create({
   backArrow: { fontSize: 30, color: 'white', fontWeight: 'bold' },
   logo: { width: 56, height: 56 },
   headerTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginLeft: 12, flex: 1 },
-  hamburger: { padding: 8 },
+  menuButton: { 
+    position: 'absolute', 
+    top: 50, 
+    right: 20, 
+    zIndex: 50, 
+    padding: 10 
+  },
 
   container: { alignItems: 'center', paddingVertical: 20 },
   sectionTitle: { color: '#E8F6F7', fontSize: 16, marginBottom: 16, textAlign: 'center' },
@@ -276,5 +304,23 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  menuOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    zIndex: 100,
+  },
+  menuBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  menuContent: {
+    width: '70%',
+    backgroundColor: '#FFF',
+    height: '100%',
   },
 });
