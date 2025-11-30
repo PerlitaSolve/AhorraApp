@@ -33,7 +33,7 @@ export default function Sesion({ navigation, volver }) {
             if (resultado.success) {
                 Alert.alert('Bienvenido', `Hola ${resultado.usuario.nombre}`);
                 setUsuarioActual(resultado.usuario);
-                setScreen('iniciarSesion');
+                navigation.navigate('Gastos', { usuarioId: resultado.usuario.id });
             } else {
                 Alert.alert('Error', resultado.message);
             }

@@ -95,7 +95,7 @@ export default function Comparacion({ navigation, volver }) {
         )}
         <Image source={require('../assets/L-SFon.png')} style={styles.logo} />
         <Text style={styles.headerTitle}>AHORRA + APP</Text>
-        <TouchableOpacity onPress={() => navigation?.openDrawer && navigation.openDrawer()} style={styles.hamburger}>
+        <TouchableOpacity onPress={() => navigation?.openDrawer && navigation.openDrawer('MenuLateral')} style={styles.hamburger}>
           <Text style={{ color: '#fff', fontSize: 20 }}>≡</Text>
         </TouchableOpacity>
       </View>

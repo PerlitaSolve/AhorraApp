@@ -6,9 +6,9 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 export default function MenuLateral({ navigation, volver }) {
 
   const menuItems = [
-        { name: 'Transacciones', icon: 'repeat', screen: 'Transactions' },
-        { name: 'Presupuesto', icon: 'currency-usd', screen: 'Budget' },
-        { name: 'Notificaciones', icon: 'bell', screen: 'Notifications' },
+        { name: 'Transacciones', icon: 'repeat', navigation: 'Transactions' },
+        { name: 'Presupuesto', icon: 'currency-usd', navigation: 'P' },
+        { name: 'Notificaciones', icon: 'bell', navigation: 'Notifications' },
   ];
 
   const handlelogout = () => {
