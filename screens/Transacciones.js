@@ -8,7 +8,7 @@ import EditarTrans from './EditarTrans'
 
 
 
-export default function Transacciones({ volver, usuarioId, onEditarTransaccion }) {
+export default function Transacciones({ volver, usuarioId, onEditarTransaccion, navigation }) {
     const [transacciones, setTransacciones] = useState([]);
     const [loading, setLoading] = useState(true);
     const [mostrarCrear, setMostrarCrear] = useState(false);

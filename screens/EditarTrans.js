@@ -6,7 +6,7 @@ import { initDatabase } from '../services/database';
 
 
 
-export default function EditarTrans({ volver, usuarioId, transaccion, onTransaccionEditada }) {
+export default function EditarTrans({ volver, usuarioId, transaccion, onTransaccionEditada, navigation }) {
   const [tipo, setTipo] = useState(transaccion?.tipo || 'GASTO');
   const [monto, setMonto] = useState(transaccion?.monto?.toString() || '');
   const [categoria, setCategoria] = useState(transaccion?.categoria || '');

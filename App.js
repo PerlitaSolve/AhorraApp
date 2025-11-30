@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import Autenticacion from './screens/Autenticacion'; // importar nuestra pantalla de contador 
+import Autenticacion from './screens/Autenticacion';
+import Sesion from './screens/Sesion';
+import Registro from './screens/Registro';
+import Password from './screens/Password';
+import Transacciones from './screens/Transacciones';
+import CrearTrans from './screens/CrearTrans';
+import EditarTrans from './screens/EditarTrans'; 
 import Ingresos from './screens/Ingresos';
 import Gastos from './screens/Gastos';
 import Comparacion from './screens/Comparacion';
@@ -10,8 +16,12 @@ import Presupuesto2 from './screens/Presupuesto2';
 import CalendarioComparacion from './screens/CalendarioComparacion';
 import MenuLateral from './screens/MenuLateral';
 import MenuTemporal from './screens/MenuTemporal';
+
 import { UserProvider } from './context/UserContext';
 import { initDatabase } from './services/database';
+
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // 2. Main: Zona de componentes
 export default function App() {
@@ -53,9 +63,34 @@ export default function App() {
     );
   }
 
+  const Stack = createNativeStackNavigator();
+
   return (
     <UserProvider>
-      <MenuTemporal/>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Autenticacion" screenOptions={{ headerShown: false }}>
+          
+          <Stack.Screen name="Autenticacion" component={Autenticacion} />
+          <Stack.Screen name="Sesion" component={Sesion} />
+          <Stack.Screen name="Registro" component={Registro} />
+          <Stack.Screen name="Password" component={Password} />
+
+          <Stack.Screen name="MenuLateral" component={MenuLateral} />
+
+          <Stack.Screen name="Ingresos" component={Ingresos} />
+          <Stack.Screen name="Gastos" component={Gastos} />
+          <Stack.Screen name="Comparacion" component={Comparacion} />
+          <Stack.Screen name="Notificaciones" component={Notificaciones} />
+          <Stack.Screen name="Presupuesto1" component={Presupuesto1} />
+          <Stack.Screen name="Presupuesto2" component={Presupuesto2} />
+          <Stack.Screen name="CalendarioComparacion" component={CalendarioComparacion} />
+
+          <Stack.Screen name="Transacciones" component={Transacciones} />
+          <Stack.Screen name="CrearTrans" component={CrearTrans} />
+          <Stack.Screen name="EditarTrans" component={EditarTrans} />
+
+        </Stack.Navigator>
+      </NavigationContainer>
     </UserProvider>
   );
   

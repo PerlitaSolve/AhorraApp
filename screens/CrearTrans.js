@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { crearTransaccion } from '../services/transactionService';
 import { initDatabase } from '../services/database';
 
-export default function CrearTrans({ volver, usuarioId, onTransaccionCreada, navigation, route }) {
+export default function CrearTrans({ volver, usuarioId, onTransaccionCreada, navigation, route, navegation }) {
   const [monto, setMonto]=useState('');
   const [categoria, setCategoria]=useState('');
   const [descripcion, setDescripcion]=useState('');

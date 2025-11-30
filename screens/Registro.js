@@ -4,11 +4,11 @@
 import { Text, StyleSheet, View, Pressable, TextInput, Alert, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React,{useState, useEffect} from 'react'
 import Autenticacion from './Autenticacion';
-import Egresos from './Egresos';
+
 import { registrarUsuario } from '../services/authService';
 import { initDatabase } from '../services/database';
 
-export default function Registro({ volver }) {
+export default function Registro({ volver, navigation }) {
     const [nombre, setNombre] = useState('');
     const [password, setPassword] = useState('');
     const [conPassword, setconPassword] = useState('');
@@ -44,7 +44,7 @@ export default function Registro({ volver }) {
             if (resultado.success) {
                 Alert.alert('Éxito', resultado.message);
                 setUsuarioId(resultado.userId);
-                setScreen('egresos');
+                navigation.navigate('Gastos', { usuarioId: resultado.userId });
             } else {
                 Alert.alert('Error', resultado.message);
             }
@@ -56,12 +56,6 @@ export default function Registro({ volver }) {
         }
     }
 
-    if(screen === 'egresos'){
-        return<Egresos usuarioId={usuarioId} />;
-    }
-    if(screen === 'cancelar'){
-        return<Autenticacion/>;
-    }
     
     if(loading){
         return(
@@ -133,7 +127,7 @@ export default function Registro({ volver }) {
             <Text style= {styles.politica}>Acepto el aviso de privacidad y{'\n'} la Jurisdiccion aplicable.</Text>
 
             <View style={styles.contenedorBotones}>
-                <Pressable style={styles.boton} onPress={() => setScreen('cancelar')}>
+                <Pressable style={styles.boton} onPress={() => navigation.goBack()}> //Autenticacion
                     <Text style={styles.botonTexto}>Cancelar</Text>
                 </Pressable>
                 <Pressable style={styles.botonPrimario} onPress={registrarme}>

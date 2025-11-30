@@ -1,45 +1,34 @@
 
 ///////////////////                  SCREEN 1 LOGIN 
 
-import { Text, StyleSheet, View, Button, StatusBar, TouchableOpacity } from 'react-native'// StatusBar controla la barra de estado 
+import { Text, StyleSheet, View, Pressable, StatusBar, TouchableOpacity } from 'react-native'// StatusBar controla la barra de estado 
 import React, { useState } from 'react'
 
-import Registro from './Registro';
-import Sesion from './Sesion';
-
-export default function App({ volver }){
-
-    const [screen, setScreen] = useState('menu');
-
-    switch (screen) {
-        case 'registro':
-            return <Registro volver={volver} />;
-        case 'sesion':
-            return <Sesion volver={volver} />;
-        case 'menu':   
-            return (
-               <View style={styles.container}>
-                 {volver && (
-                   <TouchableOpacity onPress={volver} style={styles.backButton}>
-                     <Text style={styles.backArrow}>←</Text>
-                   </TouchableOpacity>
-                 )}
-           
-                 <Text style={styles.texto}>AHORRA + APP</Text>
-                 <Text style={styles.texto2}>“¡Bienvenido!{'\n'}Tu dinero, más organizado y seguro que {'\n'} nunca.”</Text>
-           
-                <View style={styles.contenedorBoton}>
-                 <Pressable style={styles.botonPrimario} onPress={() => setScreen('registro')}>
-                     <Text style={styles.botonTextoPrimario}>Regístrate</Text>
-                 </Pressable>
-                 <Pressable style={styles.botonSecundario} onPress={() => setScreen('sesion')}>
-                     <Text style={styles.botonTextoSecundario}>Iniciar sesión</Text>
-                 </Pressable>
-                </View>
-                 <StatusBar style="auto" />
-               </View>
-            );
-    }
+export default function App({ navigation, volver }) {
+   
+      return (
+          <View style={styles.container}>
+            {volver && (
+              <TouchableOpacity onPress={volver} style={styles.backButton}>
+                <Text style={styles.backArrow}>←</Text>
+              </TouchableOpacity>
+            )}
+      
+            <Text style={styles.texto}>AHORRA + APP</Text>
+            <Text style={styles.texto2}>“¡Bienvenido!{'\n'}Tu dinero, más organizado y seguro que {'\n'} nunca.”</Text>
+      
+          <View style={styles.contenedorBoton}>
+            <Pressable style={styles.botonPrimario} onPress={() => navigation.navigate('Registro')}>
+                <Text style={styles.botonTextoPrimario}>Regístrate</Text>
+            </Pressable>
+            <Pressable style={styles.botonSecundario} onPress={() => navigation.navigate('Sesion')}>
+                <Text style={styles.botonTextoSecundario}>Iniciar sesión</Text>
+            </Pressable>
+          </View>
+            <StatusBar style="auto" />
+          </View>
+      );
+    
     
 }
 

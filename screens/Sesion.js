@@ -3,14 +3,11 @@
 
 import { Text, StyleSheet, View, TextInput, Alert, Pressable, StatusBar, TouchableOpacity, ActivityIndicator} from 'react-native'
 import React, { useState, useEffect } from 'react'
-import Registro from './Registro';
-import Egresos from './Egresos';
-import Password from './Password';
 import { iniciarSesion } from '../services/authService';
 import { initDatabase } from '../services/database';
 
 
-export default function Sesion({ volver }) {
+export default function Sesion({ navigation, volver }) {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -48,70 +45,61 @@ export default function Sesion({ volver }) {
         }
     }
 
-    switch (screen){
-        case 'iniciarSesion':
-            return <Egresos usuarioId={usuarioActual?.id} usuario={usuarioActual} />
-        case 'registro':
-            return<Registro/>
-        case 'password':
-            return <Password/>
-        case 'menu':
-            if(loading){
-                return(
-                    <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
-                        <ActivityIndicator size="large" color="#fff" />
-                        <Text style={{marginTop: 10, color: '#fff'}}>Iniciando sesión...</Text>
-                    </View>
-                );
-            }
-
-            return(
-
-                <View style={styles.container}>
-                    {volver && (
-                      <TouchableOpacity onPress={volver} style={styles.backButton}>
-                        <Text style={styles.backArrow}>←</Text>
-                      </TouchableOpacity>
-                    )}
-            
-                    <Text style={styles.titulo}>AHORRO + APP</Text> 
-    
-                    <TextInput
-                        style={styles.input}
-                        placeholder='Email *'
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType='email-address'
-                        autoCapitalize='none'
-                    />
-
-                    <TextInput
-                        style={styles.input}
-                        placeholder='Contraseña *'
-                        secureTextEntry={true}
-                        value={password}
-                        onChangeText={setPassword}      
-                    /> 
-
-                    <View style={styles.contenedorBoton}>
-                    <Pressable style={styles.botonPrimario} onPress={entrar}>
-                        <Text style={styles.botonTextoPrimario}>Iniciar Sesión</Text>
-                    </Pressable>
-                    </View>
-
-                    <View style={styles.contenedorBotones}>
-                    <Pressable style={styles.botonSecundario} onPress={() => setScreen('registro')}>
-                        <Text style={styles.botonTextoSecundario}>Quiero registrarme</Text>
-                    </Pressable>
-                    <Pressable style={styles.botonSecundario} onPress={() => setScreen('password')}>
-                        <Text style={styles.botonTextoSecundario}>¿Olvidaste tu contraseña?</Text>
-                    </Pressable>
-                    </View>
-
-                    <StatusBar style="auto" />
-                </View>  
-            );
+    if(loading){
+        return(
+            <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
+                <ActivityIndicator size="large" color="#fff" />
+                <Text style={{marginTop: 10, color: '#fff'}}>Iniciando sesión...</Text>
+            </View>
+        );
     }
+
+    return(
+
+        <View style={styles.container}>
+            {volver && (
+                <TouchableOpacity onPress={volver} style={styles.backButton}>
+                <Text style={styles.backArrow}>←</Text>
+                </TouchableOpacity>
+            )}
+    
+            <Text style={styles.titulo}>AHORRO + APP</Text> 
+
+            <TextInput
+                style={styles.input}
+                placeholder='Email *'
+                value={email}
+                onChangeText={setEmail}
+                keyboardType='email-address'
+                autoCapitalize='none'
+            />
+
+            <TextInput
+                style={styles.input}
+                placeholder='Contraseña *'
+                secureTextEntry={true}
+                value={password}
+                onChangeText={setPassword}      
+            /> 
+
+            <View style={styles.contenedorBoton}>
+            <Pressable style={styles.botonPrimario} onPress={entrar}>
+                <Text style={styles.botonTextoPrimario}>Iniciar Sesión</Text>
+            </Pressable>
+            </View>
+
+            <View style={styles.contenedorBotones}>
+            <Pressable style={styles.botonSecundario} onPress={() => navigation.navigate('Registro')}>
+                <Text style={styles.botonTextoSecundario}>Quiero registrarme</Text>
+            </Pressable>
+            <Pressable style={styles.botonSecundario} onPress={() => navigation.navigate('Password')}>
+                <Text style={styles.botonTextoSecundario}>¿Olvidaste tu contraseña?</Text>
+            </Pressable>
+            </View>
+
+            <StatusBar style="auto" />
+        </View>  
+    );
 }
 
 const styles = StyleSheet.create({

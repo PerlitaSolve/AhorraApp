@@ -7,7 +7,7 @@ import Sesion from './Sesion';
 import { recuperarPassword } from '../services/authService';
 import { initDatabase } from '../services/database';
 
-export default function Password({ volver }) {
+export default function Password({ volver, navigation }) {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -37,7 +37,7 @@ export default function Password({ volver }) {
             
             if (resultado.success) {
                 Alert.alert('Éxito', resultado.message);
-                setScreen('sesion');
+                navigation.navigate('Sesion');
             } else {
                 Alert.alert('Error', resultado.message);
             }
@@ -50,70 +50,67 @@ export default function Password({ volver }) {
     };
 
 
-    switch (screen) {
-        case 'sesion':
-            return <Sesion />;
-        case 'registro':
-                if(loading){
-                    return(
-                        <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
-                            <ActivityIndicator size="large" color="#1D617A" />
-                            <Text style={{marginTop: 10}}>Recuperando contraseña...</Text>
-                        </View>
-                    );
-                }
-
-                return (
-                <View style={styles.container}>
-                    {volver && (
-                      <TouchableOpacity onPress={volver} style={styles.backButton}>
-                        <Text style={styles.backArrow}>←</Text>
-                      </TouchableOpacity>
-                    )}
-                    <View style={styles.fondoArriba}>
-                        <Text style={styles.titulo}>AHORRA + APP</Text>
-                    </View>
-
-                    <View style={styles.contenido}>
-                        <Text style={styles.subTitulo}>¿ Olvidaste tu contraseña ?</Text>
-
-                        <TextInput
-                            style={styles.input}
-                            placeholder='Correo electrónico *'
-                            value={email}
-                            onChangeText={setEmail}
-                            keyboardType='email-address'
-                            autoCapitalize='none'
-                        />
-
-                        <TextInput
-                            style={styles.input}
-                            placeholder='Nueva contraseña *'
-                            secureTextEntry={true}
-                            value={password}
-                            onChangeText={setPassword}
-                        />
-
-                        <TextInput
-                            style={styles.input}
-                            placeholder='Confirmar contraseña *'
-                            secureTextEntry={true}
-                            value={conPassword}
-                            onChangeText={setConPassword}
-                        />
-
-                        <View style={styles.contenedorBotones}>
-                            <Pressable style={styles.boton} onPress={() => setScreen('sesion')}>
-                                <Text style={styles.botonTexto}>Cancelar</Text>
-                            </Pressable>
-                            <Pressable style={styles.botonPrimario} onPress={recuperarContrasena}>
-                                <Text style={styles.botonTextoPrimario}>Continuar</Text>
-                            </Pressable>
-                        </View>
-                    </View>
+    
+        if(loading){
+            return(
+                <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
+                    <ActivityIndicator size="large" color="#1D617A" />
+                    <Text style={{marginTop: 10}}>Recuperando contraseña...</Text>
                 </View>
             );
-    }
+        }
+
+        return (
+        <View style={styles.container}>
+            {volver && (
+                <TouchableOpacity onPress={volver} style={styles.backButton}>
+                <Text style={styles.backArrow}>←</Text>
+                </TouchableOpacity>
+            )}
+            <View style={styles.fondoArriba}>
+                <Text style={styles.titulo}>AHORRA + APP</Text>
+            </View>
+
+            <View style={styles.contenido}>
+                <Text style={styles.subTitulo}>¿ Olvidaste tu contraseña ?</Text>
+
+                <TextInput
+                    style={styles.input}
+                    placeholder='Correo electrónico *'
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType='email-address'
+                    autoCapitalize='none'
+                />
+
+                <TextInput
+                    style={styles.input}
+                    placeholder='Nueva contraseña *'
+                    secureTextEntry={true}
+                    value={password}
+                    onChangeText={setPassword}
+                />
+
+                <TextInput
+                    style={styles.input}
+                    placeholder='Confirmar contraseña *'
+                    secureTextEntry={true}
+                    value={conPassword}
+                    onChangeText={setConPassword}
+                />
+
+                <View style={styles.contenedorBotones}>
+                    <Pressable style={styles.boton} onPress={() => navigation.goBack()}>
+                        <Text style={styles.botonTexto}>Cancelar</Text>
+                    </Pressable>
+                    <Pressable style={styles.botonPrimario} onPress={recuperarContrasena}>
+                        <Text style={styles.botonTextoPrimario}>Continuar</Text>
+                    </Pressable>
+                </View>
+            </View>
+        </View>
+    );
+    
 }
 
 const styles = StyleSheet.create({
