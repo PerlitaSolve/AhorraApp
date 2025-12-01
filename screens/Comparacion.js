@@ -35,7 +35,9 @@ export default function Comparacion({ navigation, volver }) {
       });
 
       if (resultado.success) {
-        const { ingresos, gastos, balance } = resultado.resumen;
+        const ingresos = resultado.resumen?.totalIngresos || 0;
+        const gastos = resultado.resumen?.totalGastos || 0;
+        const balance = resultado.resumen?.balance || 0;
         setResumen({ ingresos, gastos, balance });
 
         // Crear gráfica
@@ -139,17 +141,17 @@ export default function Comparacion({ navigation, volver }) {
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Ingresos</Text>
-              <Text style={styles.statAmount}>$ {resumen.ingresos.toFixed(2)}</Text>
+              <Text style={styles.statAmount}>$ {(resumen.ingresos || 0).toFixed(2)}</Text>
             </View>
             <View style={[styles.statBox, { borderLeftWidth: 1, borderLeftColor: '#E0E0E0' }]}>
               <Text style={styles.statLabel}>Gastos</Text>
-              <Text style={[styles.statAmount, { color: '#D32F2F' }]}>$ {resumen.gastos.toFixed(2)}</Text>
+              <Text style={[styles.statAmount, { color: '#D32F2F' }]}>$ {(resumen.gastos || 0).toFixed(2)}</Text>
             </View>
           </View>
 
           <View style={styles.balanceBox}>
             <Text style={styles.balanceLabel}>Balance del Mes</Text>
-            <Text style={[styles.balanceAmount, { color: getAlertColor() }]}>$ {resumen.balance.toFixed(2)}</Text>
+            <Text style={[styles.balanceAmount, { color: getAlertColor() }]}>$ {(resumen.balance || 0).toFixed(2)}</Text>
           </View>
 
           <View style={[styles.alertBox, { backgroundColor: getAlertColor() }]}>
@@ -182,10 +184,10 @@ export default function Comparacion({ navigation, volver }) {
         </View>
 
         <View style={styles.navButtons}>
-          <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Ingresos')}>
+          <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Home', { screen: 'Ingresos' })}>
             <Text style={styles.navButtonText}>Ir a Ingresos</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Gastos')}>
+          <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate('Home', { screen: 'Gastos' })}>
             <Text style={styles.navButtonText}>Ir a Gastos</Text>
           </TouchableOpacity>
         </View>

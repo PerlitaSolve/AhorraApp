@@ -1,13 +1,13 @@
 import { StyleSheet, Text, View, FlatList, Pressable, ImageBackground, Image, Alert, TouchableOpacity, ActivityIndicator, TextInput, Modal } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { obtenerTransacciones, eliminarTransaccion, obtenerTransaccionesFiltradas, obtenerCategorias } from '../services/transactionService'
+import { obtenerTransacciones, eliminarTransaccion, obtenerTransaccionesFiltradas } from '../services/transactionService'
 import { initDatabase } from '../services/database'
 import { useUser } from '../context/UserContext'
 import CrearTrans from './CrearTrans'
 import EditarTrans from './EditarTrans'
 
-
+const CATEGORIAS = ['Alimentacion', 'Educacion', 'Transporte', 'Servicios', 'Salud', 'Otros'];
 
 export default function Transacciones({ volver, onEditarTransaccion, navigation }) {
     const { usuario } = useUser();
@@ -17,7 +17,6 @@ export default function Transacciones({ volver, onEditarTransaccion, navigation 
     const [mostrarEditar, setMostrarEditar] = useState(false);
     const [transaccionEditando, setTransaccionEditando] = useState(null);
     const [mostrarFiltros, setMostrarFiltros] = useState(false);
-    const [categorias, setCategorias] = useState([]);
     const [filtros, setFiltros] = useState({
         categoria: '',
         fechaInicio: '',
@@ -30,7 +29,6 @@ export default function Transacciones({ volver, onEditarTransaccion, navigation 
         initDatabase();
         if (usuario?.id) {
             cargarTransacciones();
-            cargarCategorias();
         }
     }, [usuario?.id]);
 
@@ -57,18 +55,7 @@ export default function Transacciones({ volver, onEditarTransaccion, navigation 
         }
     };
 
-    const cargarCategorias = async () => {
-        if (!usuario.id) return;
-        
-        try {
-            const resultado = await obtenerCategorias(usuario.id);
-            if (resultado.success) {
-                setCategorias(resultado.categorias);
-            }
-        } catch (error) {
-            console.error('Error al cargar categorías:', error);
-        }
-    };
+
 
     const aplicarFiltros = async () => {
         if (!usuario.id) return;

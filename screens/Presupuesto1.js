@@ -1,8 +1,10 @@
-import { Text, StyleSheet, View, StatusBar, ScrollView, TouchableOpacity, Image, Alert, TextInput, Modal, ActivityIndicator } from 'react-native';
+import { Text, StyleSheet, View, StatusBar, ScrollView, TouchableOpacity, Image, Alert, TextInput, Modal, ActivityIndicator, FlatList, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+
+const CATEGORIAS = ['Alimentacion', 'Educacion', 'Transporte', 'Servicios', 'Salud', 'Otros'];
 import { 
   crearPresupuesto, 
   obtenerPresupuestos, 
@@ -18,6 +20,7 @@ export default function Presupuesto1({ navigation, volver }) {
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [editando, setEditando] = useState(null);
+  const [modalCategoriaVisible, setModalCategoriaVisible] = useState(false);
   
   // Formulario
   const [categoria, setCategoria] = useState('');
@@ -281,19 +284,24 @@ export default function Presupuesto1({ navigation, volver }) {
         visible={modalVisible}
         onRequestClose={cerrarModal}
       >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.modalContainer}>
+          <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitulo}>
               {editando ? 'Editar Presupuesto' : 'Nuevo Presupuesto'}
             </Text>
 
             <Text style={styles.labelInput}>Categoría</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Ej: Comida, Transporte, Entretenimiento"
-              value={categoria}
-              onChangeText={setCategoria}
-            />
+            <TouchableOpacity 
+              style={styles.categoriaButton}
+              onPress={() => setModalCategoriaVisible(true)}
+            >
+              <Text style={categoria ? styles.categoriaButtonTextSelected : styles.categoriaButtonText}>
+                {categoria || 'Selecciona una categoría'}
+              </Text>
+              <Ionicons name="chevron-down" size={20} color={categoria ? "#000" : "#999"} />
+            </TouchableOpacity>
 
             <Text style={styles.labelInput}>Monto del Presupuesto</Text>
             <TextInput
@@ -379,7 +387,47 @@ export default function Presupuesto1({ navigation, volver }) {
               </TouchableOpacity>
             </View>
           </View>
+          </TouchableWithoutFeedback>
+
+          {/* Modal anidado para seleccionar categoría */}
+          {modalCategoriaVisible && (
+            <View style={styles.modalOverlayNested}>
+              <TouchableOpacity 
+                style={styles.modalOverlay}
+                activeOpacity={1}
+                onPress={() => setModalCategoriaVisible(false)}
+              >
+                <TouchableOpacity 
+                  activeOpacity={1} 
+                  onPress={(e) => e.stopPropagation()}
+                >
+                  <View style={styles.modalContentCategoria}>
+                    <Text style={styles.modalTituloCategoria}>Selecciona una categoría</Text>
+                    <FlatList
+                      data={CATEGORIAS}
+                      keyExtractor={(item) => item}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          style={styles.categoriaItem}
+                          onPress={() => {
+                            setCategoria(item);
+                            setModalCategoriaVisible(false);
+                          }}
+                        >
+                          <Text style={styles.categoriaItemText}>{item}</Text>
+                          {categoria === item && (
+                            <Ionicons name="checkmark" size={24} color="#4c79e3" />
+                          )}
+                        </TouchableOpacity>
+                      )}
+                    />
+                  </View>
+                </TouchableOpacity>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );
@@ -426,6 +474,74 @@ const styles = StyleSheet.create({
   labelInput: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 },
   subLabelInput: { fontSize: 12, fontWeight: '500', color: '#666', marginBottom: 5 },
   input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, marginBottom: 15, fontSize: 16, backgroundColor: '#f9f9f9' },
+  categoriaButton: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginBottom: 15,
+    backgroundColor: '#f9f9f9',
+    height: 50,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+  },
+  categoriaButtonText: {
+    fontSize: 16,
+    color: '#999',
+  },
+  categoriaButtonTextSelected: {
+    fontSize: 16,
+    color: '#000',
+    fontWeight: '500',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalOverlayNested: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContentCategoria: {
+    width: '80%',
+    maxHeight: '60%',
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTituloCategoria: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#1D617A',
+    textAlign: 'center',
+  },
+  categoriaItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  categoriaItemText: {
+    fontSize: 16,
+    color: '#000',
+  },
   periodoContainer: { flexDirection: 'row', gap: 10, marginBottom: 15 },
   periodoBtn: { flex: 1, padding: 12, borderWidth: 1, borderColor: '#1D617A', borderRadius: 8, alignItems: 'center' },
   periodoBtnActive: { backgroundColor: '#1D617A' },

@@ -1,7 +1,10 @@
-import { Text, StyleSheet, View, ImageBackground, Pressable, TextInput, Image, TouchableOpacity, Alert, ActivityIndicator} from 'react-native'
+import { Text, StyleSheet, View, ImageBackground, Pressable, TextInput, Image, TouchableOpacity, Alert, ActivityIndicator, Modal, FlatList, Keyboard, TouchableWithoutFeedback} from 'react-native'
 import React, { useState, useEffect } from 'react'
+import { Ionicons } from '@expo/vector-icons';
 import { crearTransaccion } from '../services/transactionService';
 import { initDatabase } from '../services/database';
+
+const CATEGORIAS = ['Alimentacion', 'Educacion', 'Transporte', 'Servicios', 'Salud', 'Otros'];
 
 export default function CrearTrans({ volver, usuarioId, onTransaccionCreada, navigation, route, navegation }) {
   const [monto, setMonto]=useState('');
@@ -9,6 +12,7 @@ export default function CrearTrans({ volver, usuarioId, onTransaccionCreada, nav
   const [descripcion, setDescripcion]=useState('');
   const [tipo, setTipo] = useState('GASTO');
   const [loading, setLoading] = useState(false);
+  const [modalCategoriaVisible, setModalCategoriaVisible] = useState(false);
 
   // Obtener usuarioId y tipo del contexto o parámetros de navegación
   const { useUser } = require('../context/UserContext');
@@ -109,6 +113,7 @@ export default function CrearTrans({ volver, usuarioId, onTransaccionCreada, nav
   };
 
     return (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ImageBackground style={styles.background} source={require('../assets/FCrear.png')}>
             <View style={styles.container}>
                 <View style={styles.nombrecontainer}>
@@ -156,12 +161,15 @@ export default function CrearTrans({ volver, usuarioId, onTransaccionCreada, nav
                     />
                     <Text style={styles.subtitulos}>Categoria</Text>
                 
-                    <TextInput
-                        style={styles.input}
-                        placeholder='Escribe la categoria aqui'
-                        value={categoria}
-                        onChangeText={setCategoria}
-                    />
+                    <TouchableOpacity 
+                        style={styles.categoriaButton}
+                        onPress={() => setModalCategoriaVisible(true)}
+                    >
+                        <Text style={categoria ? styles.categoriaButtonTextSelected : styles.categoriaButtonText}>
+                            {categoria || 'Selecciona una categoría'}
+                        </Text>
+                        <Ionicons name="chevron-down" size={20} color={categoria ? "#000" : "#999"} />
+                    </TouchableOpacity>
                     <Text style={styles.subtitulos}>Descripción</Text>
                     <TextInput
                         style={styles.input}
@@ -183,8 +191,45 @@ export default function CrearTrans({ volver, usuarioId, onTransaccionCreada, nav
                     )}
                 </View>
 
+                {/* Modal para seleccionar categoría */}
+                <Modal
+                    visible={modalCategoriaVisible}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={() => setModalCategoriaVisible(false)}
+                >
+                    <TouchableOpacity 
+                        style={styles.modalOverlay}
+                        activeOpacity={1}
+                        onPress={() => setModalCategoriaVisible(false)}
+                    >
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitulo}>Selecciona una categoría</Text>
+                            <FlatList
+                                data={CATEGORIAS}
+                                keyExtractor={(item) => item}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity
+                                        style={styles.categoriaItem}
+                                        onPress={() => {
+                                            setCategoria(item);
+                                            setModalCategoriaVisible(false);
+                                        }}
+                                    >
+                                        <Text style={styles.categoriaItemText}>{item}</Text>
+                                        {categoria === item && (
+                                            <Ionicons name="checkmark" size={24} color="#4c79e3" />
+                                        )}
+                                    </TouchableOpacity>
+                                )}
+                            />
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
+
             </View>
         </ImageBackground>
+        </TouchableWithoutFeedback>
     )
   
 }
@@ -244,16 +289,76 @@ const styles = StyleSheet.create({
         fontFamily:'Italic',
     },
     input:{
-        width: 250,
-        height: 50,
-        borderWidth:2,
-        borderColor:'#d0d0d0ff',
+        width: 280,
+        height: 55,
+        borderWidth: 1,
+        borderColor: '#ccc',
         borderRadius: 10,
         paddingHorizontal: 10,
         marginVertical:10,
         backgroundColor: '#f1eeeeff',
         alignItems: 'center',
         alignContent: 'center', 
+    },
+    categoriaButton: {
+        width: 280,
+        height: 55,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 10,
+        marginVertical: 10,
+        backgroundColor: '#f1eeeeff',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 15,
+    },
+    categoriaButtonText: {
+        fontSize: 16,
+        color: '#999',
+    },
+    categoriaButtonTextSelected: {
+        fontSize: 16,
+        color: '#000',
+        fontWeight: '500',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        width: '80%',
+        maxHeight: '60%',
+        backgroundColor: '#fff',
+        borderRadius: 15,
+        padding: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    modalTitulo: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        color: '#003d4d',
+        textAlign: 'center',
+    },
+    categoriaItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    categoriaItemText: {
+        fontSize: 16,
+        color: '#000',
     },
     boton:{
         marginTop: 20,
