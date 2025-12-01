@@ -201,6 +201,11 @@ export default function App() {
             component={EditarTrans} 
             options={{ headerShown: false }} 
           />
+          <Stack.Screen 
+            name="Transacciones" 
+            component={Transacciones} 
+            options={{ headerShown: false }} 
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </UserProvider>

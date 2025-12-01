@@ -1,23 +1,64 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView} from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';  
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useUser } from '../context/UserContext';
+import { obtenerResumenTransacciones } from '../services/transactionService';
+import { useNavigation } from '@react-navigation/native';  
 
-
-export default function MenuLateral({ navigation, volver }) {
+export default function MenuLateral({volver }) {
+  const { usuario, logout } = useUser();
+  const [saldo, setSaldo] = useState(0);
+  const [cargando, setCargando] = useState(true);
+  const navigation = useNavigation();
 
   const menuItems = [
-        { name: 'Transacciones', icon: 'repeat', navigation: 'Transactions' },
-        { name: 'Presupuesto', icon: 'currency-usd', navigation: 'P' },
-        { name: 'Notificaciones', icon: 'bell', navigation: 'Notifications' },
+        { name: 'Transacciones', icon: 'repeat', screen: 'Transacciones' },
+        { name: 'Presupuesto', icon: 'currency-usd', screen: 'Presupuesto2' },
+        { name: 'Notificaciones', icon: 'bell', screen: 'Notificaciones' },
   ];
 
-  const handlelogout = () => {
-    alert('Cerrando sesión...');
-};
+  // Cargar saldo desde la base de datos
+  useEffect(() => {
+    const cargarSaldo = async () => {
+      if (usuario?.id) {
+        try {
+          const resultado = await obtenerResumenTransacciones(usuario.id);
+          if (resultado.success) {
+            setSaldo(resultado.resumen.balance || 0);
+          }
+        } catch (error) {
+          console.error('Error al cargar saldo:', error);
+        } finally {
+          setCargando(false);
+        }
+      }
+    };
 
-const navigateToDetails = (screen) => {
-  alert(`Navegando a ${screen}...`);
-};
+    cargarSaldo();
+  }, [usuario?.id]);
+
+  const handlelogout = () => {
+    Alert.alert(
+      'Cerrar sesión',
+      '¿Estás seguro de que quieres cerrar sesión?',
+      [
+        { text: 'Cancelar', onPress: () => {}, style: 'cancel' },
+        {
+          text: 'Cerrar sesión',
+          onPress: () => {
+            logout();
+            navigation?.navigate('Autenticacion');
+          },
+          style: 'destructive',
+        },
+      ]
+    );
+  };
+
+  const handleNavigation = (screen) => {
+    volver?.();
+    navigation?.navigate(screen);
+  };
 
   return (
     <View style={styles.overlay}>
@@ -39,8 +80,12 @@ const navigateToDetails = (screen) => {
             <MaterialCommunityIcons name="account" size={40} color="#357D8B"></MaterialCommunityIcons>
           </View>
           <View>
-            <Text style={styles.profileName}>Michael Jackson</Text> 
-            <Text style={styles.userBalance}>$ 20, 989</Text> 
+            <Text style={styles.profileName}>{usuario?.nombre || usuario?.email || 'Usuario'}</Text>
+            {cargando ? (
+              <ActivityIndicator size="small" color="#357D8B" />
+            ) : (
+              <Text style={styles.userBalance}>$ {saldo.toFixed(2)}</Text>
+            )}
           </View>
         </View>  
         </View>
@@ -53,7 +98,7 @@ const navigateToDetails = (screen) => {
             <TouchableOpacity
             key={item.name}
               style={styles.optionItem}
-              onPress={() => navigateToDetails(item.screen)}>
+              onPress={() => handleNavigation(item.screen)}>
                 <MaterialCommunityIcons name={item.icon} size={24} color="#357D8B" style={styles.menuIcon} />
                 <Text style={styles.menuLabel}>{item.name}</Text>
                 <MaterialCommunityIcons name="chevron-right" size={24} color="gray"/>
