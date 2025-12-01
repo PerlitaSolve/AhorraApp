@@ -4,7 +4,8 @@ import { PieChart } from 'react-native-chart-kit';
 import { Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../context/UserContext';
-import { obtenerTransaccionesFiltradas } from '../services/transactionService';
+import { obtenerTransaccionesFiltradas, obtenerResumenTransacciones } from '../services/transactionService';
+import { useFocusEffect } from '@react-navigation/native';
 import MenuLateral from './MenuLateral';
 
 const screenWidth = Dimensions.get('window').width - 40;
@@ -15,6 +16,7 @@ export default function Ingresos({ navigation, volver }) {
   const [datosGrafica, setDatosGrafica] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [totalIngresos, setTotalIngresos] = useState(0);
+  const [totalGastos, setTotalGastos] = useState(0);
   const [transacciones, setTransacciones] = useState([]);
   const [menuVisible, setMenuVisible] = useState(false);
 
@@ -42,6 +44,8 @@ export default function Ingresos({ navigation, volver }) {
       // Para 'Semana' se podría agregar lógica de rango de fechas
 
       const resultado = await obtenerTransaccionesFiltradas(usuario.id, filtros);
+      // Obtener resumen TOTAL sin filtro de tipo para calcular saldo correcto
+      const resumenTotal = await obtenerResumenTransacciones(usuario.id, {});
 
       if (resultado.success) {
         const transaccionesData = resultado.transacciones || [];
@@ -61,6 +65,12 @@ export default function Ingresos({ navigation, volver }) {
         });
 
         setTotalIngresos(total);
+
+        // Obtener datos totales para calcular saldo disponible
+        if (resumenTotal.success) {
+          setTotalIngresos(resumenTotal.resumen.totalIngresos || 0);
+          setTotalGastos(resumenTotal.resumen.totalGastos || 0);
+        }
 
         // Convertir a formato para PieChart
         if (Object.keys(datosAgrupados).length > 0) {
@@ -88,6 +98,15 @@ export default function Ingresos({ navigation, volver }) {
     cargarDatos();
   }, [periodo, usuario?.id]);
 
+  // Recargar datos cuando la pantalla recibe foco
+  useFocusEffect(
+    React.useCallback(() => {
+      if (usuario?.id) {
+        cargarDatos();
+      }
+    }, [usuario?.id, periodo])
+  );
+
   const mesesNombres = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
   const mesNombre = mesesNombres[mesActual - 1];
 
@@ -100,23 +119,27 @@ export default function Ingresos({ navigation, volver }) {
         <Image source={require('../assets/L-SFon.png')} style={styles.logoIcon} />
       </TouchableOpacity>
       
+      <View style={styles.header}>
+        <Text style={styles.headerText}>AHORRA + APP</Text>
+        <Text style={styles.balanceTitle}>Saldo disponible</Text>
+        <Text style={styles.balanceAmount}>$ {(totalIngresos - totalGastos).toFixed(2)}</Text>
+
+        <View style={styles.tabsContainer}>
+          <TouchableOpacity style={[styles.tab, styles.activeTab]}>
+            <Text style={styles.tabTextActive}>INGRESOS</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.tab]} onPress={() => navigation.navigate('Gastos')}>
+            <Text style={styles.tabText}>EGRESOS</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <TouchableOpacity 
         style={styles.menuButton}
         onPress={() => navigation.navigate('MenuLateral')}
       >
-        <Ionicons name="menu" size={28} color="#1D617A" />
+        <Ionicons name="menu" size={28} color="white" />
       </TouchableOpacity>
-      
-      <View style={styles.header}>
-        <View style={styles.tabsContainer}>
-          <TouchableOpacity style={[styles.tab, styles.inactiveTab]} onPress={() => navigation.navigate('Gastos')}>
-            <Text style={styles.tabTextInactive}>EGRESOS</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.tab, styles.activeTab]}>
-            <Text style={styles.tabTextActive}>INGRESOS</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
 
       <ScrollView style={styles.content}>
         <View style={styles.timeFilter}>
@@ -224,7 +247,33 @@ const styles = StyleSheet.create({
   header: { 
     backgroundColor: '#004A77', 
     padding: 20, 
-    paddingBottom: 50, 
+    paddingTop: 60,
+    paddingBottom: 30, 
+  },
+  menuButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 50,
+    padding: 10,
+  },
+  headerText: { 
+    color: '#FFF', 
+    fontSize: 18, 
+    textAlign: 'center', 
+    fontWeight: 'bold',
+  },
+  balanceTitle: { 
+    color: '#B0E0E6', 
+    fontSize: 14, 
+    textAlign: 'center', 
+    marginTop: 10,
+  },
+  balanceAmount: { 
+    color: '#FFF', 
+    fontSize: 32, 
+    textAlign: 'center', 
+    fontWeight: 'bold', 
   },
   logoButton: {
     position: 'absolute',
@@ -238,15 +287,8 @@ const styles = StyleSheet.create({
     height: 40,
     resizeMode: 'contain',
   },
-  menuButton: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    zIndex: 10,
-    padding: 10,
-  },
   tabsContainer: { 
-    flexDirection: 'row', 
+    flexDirection: 'row',
     justifyContent: 'center', 
     marginTop: 20,
   },
@@ -259,15 +301,13 @@ const styles = StyleSheet.create({
   activeTab: { 
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
-  inactiveTab: { 
-    backgroundColor: 'transparent', 
+  tabText: { 
+    color: '#BEE6F2',
+    fontWeight: 'bold',
   },
   tabTextActive: { 
-    color: '#FFF', 
-    fontWeight: 'bold', 
-  },
-  tabTextInactive: { 
-    color: '#BEE6F2', 
+    color: '#FFF',
+    fontWeight: 'bold',
   },
   content: { 
     flex: 1, 
@@ -280,7 +320,7 @@ const styles = StyleSheet.create({
     marginTop: 10, 
     borderBottomWidth: 2, 
     borderBottomColor: '#E0E0E0', 
-    paddingBottom: 10,
+    paddingBottom: 10, 
   },
   filterText: { 
     color: '#888', 
@@ -290,6 +330,7 @@ const styles = StyleSheet.create({
   filterTextActive: {
     color: '#004A77',
     fontWeight: 'bold',
+    fontSize: 15,
     fontSize: 15,
   },
   monthTitle: { 

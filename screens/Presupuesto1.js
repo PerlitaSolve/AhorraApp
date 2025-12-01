@@ -1,6 +1,8 @@
 import { Text, StyleSheet, View, StatusBar, ScrollView, TouchableOpacity, Image, Alert, TextInput, Modal, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
+import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { 
   crearPresupuesto, 
   obtenerPresupuestos, 
@@ -31,6 +33,16 @@ export default function Presupuesto1({ navigation, volver }) {
     }
   }, [usuario?.id]);
 
+  // Recargar datos cuando la pantalla recibe foco
+  useFocusEffect(
+    React.useCallback(() => {
+      if (usuario?.id) {
+        cargarPresupuestos();
+        cargarResumen();
+      }
+    }, [usuario?.id])
+  );
+
   const cargarPresupuestos = async () => {
     setLoading(true);
     try {
@@ -48,11 +60,15 @@ export default function Presupuesto1({ navigation, volver }) {
   const cargarResumen = async () => {
     try {
       const fechaActual = new Date();
+      const mes = fechaActual.getMonth() + 1;
+      const anio = fechaActual.getFullYear();
+      
       const resultado = await obtenerResumenPresupuestos(
         usuario.id,
-        fechaActual.getMonth() + 1,
-        fechaActual.getFullYear()
+        mes,
+        anio
       );
+      
       if (resultado.success) {
         setResumen(resultado.resumen);
       }
@@ -162,6 +178,13 @@ export default function Presupuesto1({ navigation, volver }) {
     );
   };
 
+  const handleRecargar = async () => {
+    if (usuario?.id) {
+      await cargarPresupuestos();
+      await cargarResumen();
+    }
+  };
+
   const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
   return (
@@ -173,9 +196,18 @@ export default function Presupuesto1({ navigation, volver }) {
           <Image source={require('../assets/L-SFon.png')} style={styles.logoIcon} />
         </TouchableOpacity>
         <Text style={styles.titulo}>PRESUPUESTOS</Text>
-        <TouchableOpacity style={styles.menuButton} onPress={() => navigation?.navigate('MenuLateral')}>
-          <Text style={styles.menuIcon}>☰</Text>
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity 
+            style={styles.reloadButton} 
+            onPress={handleRecargar}
+            disabled={loading}
+          >
+            <Ionicons name="reload" size={24} color={loading ? "#ccc" : "white"} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuButton} onPress={() => navigation?.navigate('MenuLateral')}>
+            <Ionicons name="menu" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView style={styles.content}>
@@ -255,20 +287,24 @@ export default function Presupuesto1({ navigation, volver }) {
               {editando ? 'Editar Presupuesto' : 'Nuevo Presupuesto'}
             </Text>
 
+            <Text style={styles.labelInput}>Categoría</Text>
             <TextInput
               style={styles.input}
-              placeholder="Categoría"
+              placeholder="Ej: Comida, Transporte, Entretenimiento"
               value={categoria}
               onChangeText={setCategoria}
             />
 
+            <Text style={styles.labelInput}>Monto del Presupuesto</Text>
             <TextInput
               style={styles.input}
-              placeholder="Monto"
+              placeholder="0.00"
               value={monto}
               onChangeText={setMonto}
               keyboardType="decimal-pad"
             />
+
+            <Text style={styles.labelInput}>Período</Text>
 
             <View style={styles.periodoContainer}>
               <TouchableOpacity
@@ -290,32 +326,44 @@ export default function Presupuesto1({ navigation, volver }) {
             </View>
 
             {periodo === 'MENSUAL' && (
-              <View style={styles.fechaContainer}>
+              <>
+                <Text style={styles.labelInput}>Fecha del Presupuesto</Text>
+                <View style={styles.fechaContainer}>
+                  <View style={{ flex: 1, marginRight: 10 }}>
+                    <Text style={styles.subLabelInput}>Mes</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="1-12"
+                      value={mes.toString()}
+                      onChangeText={(text) => setMes(parseInt(text) || 1)}
+                      keyboardType="number-pad"
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.subLabelInput}>Año</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="2025"
+                      value={anio.toString()}
+                      onChangeText={(text) => setAnio(parseInt(text) || new Date().getFullYear())}
+                      keyboardType="number-pad"
+                    />
+                  </View>
+                </View>
+              </>
+            )}
+
+            {periodo === 'ANUAL' && (
+              <>
+                <Text style={styles.labelInput}>Año del Presupuesto</Text>
                 <TextInput
-                  style={[styles.input, { flex: 1, marginRight: 10 }]}
-                  placeholder="Mes (1-12)"
-                  value={mes.toString()}
-                  onChangeText={(text) => setMes(parseInt(text) || 1)}
-                  keyboardType="number-pad"
-                />
-                <TextInput
-                  style={[styles.input, { flex: 1 }]}
-                  placeholder="Año"
+                  style={styles.input}
+                  placeholder="2025"
                   value={anio.toString()}
                   onChangeText={(text) => setAnio(parseInt(text) || new Date().getFullYear())}
                   keyboardType="number-pad"
                 />
-              </View>
-            )}
-
-            {periodo === 'ANUAL' && (
-              <TextInput
-                style={styles.input}
-                placeholder="Año"
-                value={anio.toString()}
-                onChangeText={(text) => setAnio(parseInt(text) || new Date().getFullYear())}
-                keyboardType="number-pad"
-              />
+              </>
             )}
 
             <View style={styles.modalButtons}>
@@ -344,7 +392,9 @@ const styles = StyleSheet.create({
   logoIcon: { width: 35, height: 35, resizeMode: 'contain' },
   backButton: { padding: 5 },
   backArrow: { fontSize: 28, color: 'white', fontWeight: 'bold' },
-  titulo: { fontSize: 20, fontWeight: 'bold', color: 'white' },
+  titulo: { fontSize: 20, fontWeight: 'bold', color: 'white', flex: 1, textAlign: 'center' },
+  headerButtons: { flexDirection: 'row', gap: 10 },
+  reloadButton: { padding: 5 },
   menuButton: { padding: 5 },
   menuIcon: { fontSize: 24, color: 'white' },
   content: { flex: 1, padding: 20 },
@@ -373,7 +423,9 @@ const styles = StyleSheet.create({
   modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
   modalContent: { backgroundColor: 'white', borderRadius: 10, padding: 20, width: '90%', maxWidth: 400 },
   modalTitulo: { fontSize: 20, fontWeight: 'bold', color: '#1D617A', marginBottom: 20, textAlign: 'center' },
-  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, marginBottom: 15, fontSize: 16 },
+  labelInput: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 },
+  subLabelInput: { fontSize: 12, fontWeight: '500', color: '#666', marginBottom: 5 },
+  input: { borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, marginBottom: 15, fontSize: 16, backgroundColor: '#f9f9f9' },
   periodoContainer: { flexDirection: 'row', gap: 10, marginBottom: 15 },
   periodoBtn: { flex: 1, padding: 12, borderWidth: 1, borderColor: '#1D617A', borderRadius: 8, alignItems: 'center' },
   periodoBtnActive: { backgroundColor: '#1D617A' },

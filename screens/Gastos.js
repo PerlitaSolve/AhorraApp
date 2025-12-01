@@ -4,6 +4,7 @@ import { PieChart } from 'react-native-chart-kit';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../context/UserContext';
 import { obtenerTransaccionesFiltradas, obtenerResumenTransacciones } from '../services/transactionService';
+import { useFocusEffect } from '@react-navigation/native';
 import MenuLateral from './MenuLateral';
 
 const screenWidth = Dimensions.get('window').width - 40;
@@ -45,7 +46,8 @@ export default function Gastos({ navigation, volver }) {
       }
 
       const resultado = await obtenerTransaccionesFiltradas(usuario.id, filtros);
-      const resumen = await obtenerResumenTransacciones(usuario.id, filtros);
+      // Obtener resumen TOTAL sin filtro de tipo para calcular saldo correcto
+      const resumenTotal = await obtenerResumenTransacciones(usuario.id, {});
 
       if (resultado.success) {
         const transaccionesData = resultado.transacciones || [];
@@ -66,10 +68,11 @@ export default function Gastos({ navigation, volver }) {
 
         setTotalGastos(total);
 
-        // Obtener datos de saldo
-        if (resumen.success) {
-          setTotalIngresos(resumen.resumen.ingresos || 0);
-          setSaldoDisponible(resumen.resumen.balance || 0);
+        // Obtener datos totales para calcular saldo disponible
+        if (resumenTotal.success) {
+          setTotalIngresos(resumenTotal.resumen.totalIngresos || 0);
+          setTotalGastos(resumenTotal.resumen.totalGastos || 0);
+          setSaldoDisponible(resumenTotal.resumen.balance || 0);
         }
 
         // Convertir a formato para PieChart
@@ -98,6 +101,15 @@ export default function Gastos({ navigation, volver }) {
     cargarDatos();
   }, [periodo, usuario?.id]);
 
+  // Recargar datos cuando la pantalla recibe foco
+  useFocusEffect(
+    React.useCallback(() => {
+      if (usuario?.id) {
+        cargarDatos();
+      }
+    }, [usuario?.id, periodo])
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity 
@@ -118,11 +130,11 @@ export default function Gastos({ navigation, volver }) {
         <Text style={styles.balanceAmount}>$ {saldoDisponible.toFixed(2)}</Text>
 
         <View style={styles.tabsContainer}>
-          <TouchableOpacity style={[styles.tab, styles.activeTab]}>
-            <Text style={styles.tabTextActive}>EGRESOS</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={[styles.tab]} onPress={() => navigation.navigate('Ingresos')}>
             <Text style={styles.tabText}>INGRESOS</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.tab, styles.activeTab]}>
+            <Text style={styles.tabTextActive}>EGRESOS</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -237,7 +249,8 @@ const styles = StyleSheet.create({
   header: { 
     backgroundColor: '#004A77', 
     padding: 20, 
-    paddingBottom: 50,
+    paddingTop: 60,
+    paddingBottom: 30,
   },
   menuButton: {
     position: 'absolute',
