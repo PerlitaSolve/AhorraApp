@@ -1,14 +1,13 @@
 import { getDatabase } from '../services/database';
 
-/**
- * Modelo de Transacción - Capa de acceso a datos
- * Responsabilidad: Operaciones CRUD directas con la base de datos
- */
+// Modelo de Transacción - Capa de acceso a datos
+// Responsabilidad: Operaciones CRUD directas con la base de datos
+ 
 
 class TransactionModel {
-  /**
-   * Crear una nueva transacción
-   */
+  
+   // Crear una nueva transacción
+   
   static async create(usuarioId, tipo, monto, categoria, descripcion, fecha = null) {
     const db = await getDatabase();
     
@@ -26,9 +25,8 @@ class TransactionModel {
     return result.lastInsertRowId;
   }
 
-  /**
-   * Obtener todas las transacciones de un usuario
-   */
+  // Obtener todas las transacciones de un usuario
+  
   static async findByUser(usuarioId) {
     const db = await getDatabase();
     const transacciones = await db.getAllAsync(
@@ -40,9 +38,8 @@ class TransactionModel {
     return transacciones || [];
   }
 
-  /**
-   * Obtener transacciones con filtros
-   */
+  // Obtener transacciones con filtros
+  
   static async findFiltered(usuarioId, filtros = {}) {
     const db = await getDatabase();
     
@@ -70,9 +67,7 @@ class TransactionModel {
     return transacciones || [];
   }
 
-  /**
-   * Obtener transacciones por tipo
-   */
+  // Obtener transacciones por tipo
   static async findByType(usuarioId, tipo) {
     const db = await getDatabase();
     const transacciones = await db.getAllAsync(
@@ -82,9 +77,7 @@ class TransactionModel {
     return transacciones || [];
   }
 
-  /**
-   * Obtener transacciones por categoría
-   */
+  // Obtener transacciones por categoría
   static async findByCategory(usuarioId, categoria) {
     const db = await getDatabase();
     const transacciones = await db.getAllAsync(
@@ -94,26 +87,37 @@ class TransactionModel {
     return transacciones || [];
   }
 
-  /**
-   * Obtener transacciones por categoría y rango de fechas
-   */
+  // Obtener transacciones por categoría y rango de fechas
   static async findByCategoryAndDateRange(usuarioId, categoria, mes, anio) {
     const db = await getDatabase();
-    const transacciones = await db.getAllAsync(
-      `SELECT * FROM transacciones 
-       WHERE usuario_id = ? 
-       AND categoria = ? 
-       AND strftime('%m', fecha) = ? 
-       AND strftime('%Y', fecha) = ?
-       ORDER BY fecha DESC`,
-      [usuarioId, categoria, mes.toString().padStart(2, '0'), anio.toString()]
-    );
+    
+    let query;
+    let params;
+    
+    if (mes === null || mes === undefined) {
+      // Para todo el año
+      query = `SELECT * FROM transacciones 
+               WHERE usuario_id = ? 
+               AND categoria = ? 
+               AND strftime('%Y', fecha) = ?
+               ORDER BY fecha DESC`;
+      params = [usuarioId, categoria, anio.toString()];
+    } else {
+      // Para un mes específico
+      query = `SELECT * FROM transacciones 
+               WHERE usuario_id = ? 
+               AND categoria = ? 
+               AND strftime('%m', fecha) = ? 
+               AND strftime('%Y', fecha) = ?
+               ORDER BY fecha DESC`;
+      params = [usuarioId, categoria, mes.toString().padStart(2, '0'), anio.toString()];
+    }
+    
+    const transacciones = await db.getAllAsync(query, params);
     return transacciones || [];
   }
 
-  /**
-   * Obtener una transacción por ID
-   */
+  // Obtener una transacción por ID
   static async findById(id) {
     const db = await getDatabase();
     const transaccion = await db.getFirstAsync(
@@ -123,9 +127,7 @@ class TransactionModel {
     return transaccion;
   }
 
-  /**
-   * Actualizar una transacción
-   */
+  // Actualizar una transacción
   static async update(id, tipo, monto, categoria, descripcion, fecha) {
     const db = await getDatabase();
     const result = await db.runAsync(
@@ -135,9 +137,7 @@ class TransactionModel {
     return result.changes > 0;
   }
 
-  /**
-   * Eliminar una transacción
-   */
+  // Eliminar una transacción
   static async delete(id) {
     const db = await getDatabase();
     const result = await db.runAsync(
@@ -147,27 +147,40 @@ class TransactionModel {
     return result.changes > 0;
   }
 
-  /**
-   * Calcular total de gastos por categoría en un período
-   */
+  // Calcular total de gastos por categoría en un período
   static async getTotalGastosByCategory(usuarioId, categoria, mes, anio) {
     const db = await getDatabase();
-    const result = await db.getFirstAsync(
-      `SELECT COALESCE(SUM(monto), 0) as total
-       FROM transacciones 
-       WHERE usuario_id = ? 
-       AND categoria = ? 
-       AND tipo = 'GASTO'
-       AND strftime('%m', fecha) = ? 
-       AND strftime('%Y', fecha) = ?`,
-      [usuarioId, categoria, mes.toString().padStart(2, '0'), anio.toString()]
-    );
+    
+    let query;
+    let params;
+    
+    if (mes === null || mes === undefined) {
+      // Para presupuestos anuales - sumar todos los meses del año
+      query = `SELECT COALESCE(SUM(monto), 0) as total
+               FROM transacciones 
+               WHERE usuario_id = ? 
+               AND categoria = ? 
+               AND tipo = 'GASTO'
+               AND strftime('%Y', fecha) = ?`;
+      params = [usuarioId, categoria, anio.toString()];
+    } else {
+      // Para presupuestos mensuales
+      query = `SELECT COALESCE(SUM(monto), 0) as total
+               FROM transacciones 
+               WHERE usuario_id = ? 
+               AND categoria = ? 
+               AND tipo = 'GASTO'
+               AND strftime('%m', fecha) = ? 
+               AND strftime('%Y', fecha) = ?`;
+      params = [usuarioId, categoria, mes.toString().padStart(2, '0'), anio.toString()];
+    }
+    
+    const result = await db.getFirstAsync(query, params);
     return parseFloat(result?.total || 0);
   }
 
-  /**
-   * Calcular resumen de transacciones (ingresos y gastos)
-   */
+  // Calcular resumen de transacciones (ingresos y gastos)
+  
   static async getSummary(usuarioId) {
     const db = await getDatabase();
     

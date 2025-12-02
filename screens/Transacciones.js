@@ -17,6 +17,7 @@ export default function Transacciones({ volver, onEditarTransaccion, navigation 
     const [mostrarEditar, setMostrarEditar] = useState(false);
     const [transaccionEditando, setTransaccionEditando] = useState(null);
     const [mostrarFiltros, setMostrarFiltros] = useState(false);
+    const [modalCategoriaVisible, setModalCategoriaVisible] = useState(false);
     const [filtros, setFiltros] = useState({
         categoria: '',
         fechaInicio: '',
@@ -201,13 +202,19 @@ export default function Transacciones({ volver, onEditarTransaccion, navigation 
                     <Text style={styles.backArrow}>←</Text>
                   </TouchableOpacity>
                 )}
+                <TouchableOpacity 
+                    style={styles.menuButtonTop} 
+                    onPress={() => navigation?.navigate('MenuLateral')}
+                >
+                    <Ionicons name="menu" size={28} color="white" />
+                </TouchableOpacity>
                 <View style={styles.header}>
                     <Image source={require('../assets/L-SFon.png')} style={styles.logo}/>
                     <Text style={styles.nombre}>AHORRA + APP</Text>
                     
                     <Text style={styles.titulo}>TRANSACCIONES</Text>
                     
-                    <View style={{flexDirection: 'row', gap: 10}}>
+                    <View style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
                         <Pressable style={styles.botonAnadir} onPress={() => setMostrarCrear(true)}>
                             <Text style={styles.botonTexto}>Añadir +</Text>
                         </Pressable>
@@ -296,12 +303,15 @@ export default function Transacciones({ volver, onEditarTransaccion, navigation 
                             </View>
 
                             <Text style={styles.labelFiltro}>Categoría:</Text>
-                            <TextInput
-                                style={styles.inputFiltro}
-                                placeholder="Ej: Comida, Transporte"
-                                value={filtros.categoria}
-                                onChangeText={(text) => setFiltros({...filtros, categoria: text})}
-                            />
+                            <TouchableOpacity 
+                                style={styles.categoriaButton}
+                                onPress={() => setModalCategoriaVisible(true)}
+                            >
+                                <Text style={filtros.categoria ? styles.categoriaButtonTextSelected : styles.categoriaButtonText}>
+                                    {filtros.categoria || 'Todas las categorías'}
+                                </Text>
+                                <Ionicons name="chevron-down" size={20} color={filtros.categoria ? "#000" : "#999"} />
+                            </TouchableOpacity>
                         </View>
 
                         <View style={{flexDirection: 'row', gap: 10, marginTop: 20}}>
@@ -316,6 +326,44 @@ export default function Transacciones({ volver, onEditarTransaccion, navigation 
                             </Pressable>
                         </View>
                     </View>
+
+                    {/* Modal anidado para seleccionar categoría */}
+                    {modalCategoriaVisible && (
+                        <View style={styles.modalOverlayNested}>
+                            <TouchableOpacity 
+                                style={styles.modalOverlay}
+                                activeOpacity={1}
+                                onPress={() => setModalCategoriaVisible(false)}
+                            >
+                                <TouchableOpacity 
+                                    activeOpacity={1} 
+                                    onPress={(e) => e.stopPropagation()}
+                                >
+                                    <View style={styles.modalContentCategoria}>
+                                        <Text style={styles.modalTituloCategoria}>Selecciona una categoría</Text>
+                                        <FlatList
+                                            data={[{label: 'Todas las categorías', value: ''}, ...CATEGORIAS.map(cat => ({label: cat, value: cat}))]}
+                                            keyExtractor={(item) => item.value || 'todas'}
+                                            renderItem={({ item }) => (
+                                                <TouchableOpacity
+                                                    style={styles.categoriaItem}
+                                                    onPress={() => {
+                                                        setFiltros({...filtros, categoria: item.value});
+                                                        setModalCategoriaVisible(false);
+                                                    }}
+                                                >
+                                                    <Text style={styles.categoriaItemText}>{item.label}</Text>
+                                                    {filtros.categoria === item.value && (
+                                                        <Ionicons name="checkmark" size={24} color="#4c79e3" />
+                                                    )}
+                                                </TouchableOpacity>
+                                            )}
+                                        />
+                                    </View>
+                                </TouchableOpacity>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
             </Modal>
         </ImageBackground>
@@ -421,6 +469,13 @@ export const styles = StyleSheet.create({
     },
     backButton: { position: 'absolute', top: 50, left: 20, zIndex: 10 },
     backArrow: { fontSize: 30, color: 'white', fontWeight: 'bold' },
+    menuButtonTop: { 
+        position: 'absolute',
+        top: 50,
+        right: 20,
+        zIndex: 10,
+        padding: 5,
+    },
     logo: {
         width: 80, 
         height: 80, 
@@ -541,5 +596,72 @@ export const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 14,
         fontWeight: 'bold',
+    },
+    categoriaButton: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 10,
+        backgroundColor: '#f9f9f9',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    categoriaButtonText: {
+        fontSize: 16,
+        color: '#999',
+    },
+    categoriaButtonTextSelected: {
+        fontSize: 16,
+        color: '#000',
+        fontWeight: '500',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalOverlayNested: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContentCategoria: {
+        width: 300,
+        maxHeight: '60%',
+        backgroundColor: '#fff',
+        borderRadius: 15,
+        padding: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    modalTituloCategoria: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        color: '#003d4d',
+        textAlign: 'center',
+    },
+    categoriaItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    categoriaItemText: {
+        fontSize: 16,
+        color: '#000',
     },
 });

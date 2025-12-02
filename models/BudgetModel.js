@@ -1,14 +1,14 @@
 import { getDatabase } from '../services/database';
 
-/**
- * Modelo de Presupuesto - Capa de acceso a datos
- * Responsabilidad: Operaciones CRUD directas con la base de datos
- */
+
+ //Modelo de Presupuesto - Capa de acceso a datos
+ // Responsabilidad: Operaciones CRUD directas con la base de datos
+
 
 class BudgetModel {
-  /**
-   * Crear un nuevo presupuesto
-   */
+  
+  //  Crear un nuevo presupuesto
+   
   static async create(usuarioId, categoria, monto, periodo, mes, anio) {
     const db = await getDatabase();
     const result = await db.runAsync(
@@ -18,9 +18,9 @@ class BudgetModel {
     return result.lastInsertRowId;
   }
 
-  /**
-   * Obtener todos los presupuestos de un usuario
-   */
+  
+   // Obtener todos los presupuestos de un usuario
+   
   static async findByUser(usuarioId) {
     const db = await getDatabase();
     const presupuestos = await db.getAllAsync(
@@ -30,9 +30,9 @@ class BudgetModel {
     return presupuestos || [];
   }
 
-  /**
-   * Buscar presupuesto existente
-   */
+  
+   // Buscar presupuesto existente
+   
   static async findExisting(usuarioId, categoria, periodo, anio, mes = null) {
     const db = await getDatabase();
     
@@ -53,9 +53,9 @@ class BudgetModel {
     }
   }
 
-  /**
-   * Obtener presupuestos filtrados
-   */
+  
+   // Obtener presupuestos filtrados
+   
   static async findFiltered(usuarioId, filtros = {}) {
     const db = await getDatabase();
     
@@ -88,9 +88,9 @@ class BudgetModel {
     return presupuestos || [];
   }
 
-  /**
-   * Obtener un presupuesto por ID
-   */
+  
+   // Obtener un presupuesto por ID
+   
   static async findById(id) {
     const db = await getDatabase();
     const presupuesto = await db.getFirstAsync(
@@ -100,22 +100,34 @@ class BudgetModel {
     return presupuesto;
   }
 
-  /**
-   * Obtener presupuesto por categoría y período
-   */
+  
+   // Obtener presupuesto por categoría y período
+   
   static async findByCategoryAndPeriod(usuarioId, categoria, mes, anio) {
     const db = await getDatabase();
-    const presupuesto = await db.getFirstAsync(
-      `SELECT * FROM presupuestos 
-       WHERE usuario_id = ? AND categoria = ? AND mes = ? AND anio = ?`,
-      [usuarioId, categoria, mes, anio]
-    );
+    
+    let query;
+    let params;
+    
+    if (mes === null || mes === undefined) {
+      // Buscar presupuesto anual
+      query = `SELECT * FROM presupuestos 
+               WHERE usuario_id = ? AND categoria = ? AND periodo = 'ANUAL' AND anio = ?`;
+      params = [usuarioId, categoria, anio];
+    } else {
+      // Buscar presupuesto mensual
+      query = `SELECT * FROM presupuestos 
+               WHERE usuario_id = ? AND categoria = ? AND mes = ? AND anio = ?`;
+      params = [usuarioId, categoria, mes, anio];
+    }
+    
+    const presupuesto = await db.getFirstAsync(query, params);
     return presupuesto;
   }
 
-  /**
-   * Actualizar un presupuesto
-   */
+  
+  // Actualizar un presupuesto
+  
   static async update(id, monto, categoria, periodo, mes, anio) {
     const db = await getDatabase();
     const result = await db.runAsync(
@@ -125,9 +137,9 @@ class BudgetModel {
     return result.changes > 0;
   }
 
-  /**
-   * Eliminar un presupuesto
-   */
+  
+   // Eliminar un presupuesto
+   
   static async delete(id) {
     const db = await getDatabase();
     const result = await db.runAsync(

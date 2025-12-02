@@ -241,16 +241,17 @@ class BudgetController {
    */
   static async obtenerResumenPresupuestos(usuarioId, mes, anio) {
     try {
-      if (!usuarioId || !mes || !anio) {
-        return { success: false, message: 'Usuario ID, mes y año son requeridos' };
+      if (!usuarioId || !anio) {
+        return { success: false, message: 'Usuario ID y año son requeridos' };
       }
 
-      // Obtener presupuestos del mes
-      const presupuestos = await BudgetModel.findFiltered(usuarioId, { mes, anio });
+      // Obtener presupuestos mensuales y anuales
+      const presupuestosMensuales = await BudgetModel.findFiltered(usuarioId, { periodo: 'MENSUAL', mes, anio });
+      const presupuestosAnuales = await BudgetModel.findFiltered(usuarioId, { periodo: 'ANUAL', anio });
 
-      // Para cada presupuesto, calcular gastos
-      const resumen = await Promise.all(
-        presupuestos.map(async (presupuesto) => {
+      // Procesar presupuestos mensuales
+      const resumenMensual = await Promise.all(
+        presupuestosMensuales.map(async (presupuesto) => {
           const totalGastado = await TransactionModel.getTotalGastosByCategory(
             usuarioId,
             presupuesto.categoria,
@@ -268,14 +269,43 @@ class BudgetController {
             gastado: totalGastado,
             restante: presupuesto.monto - totalGastado,
             porcentajeUsado,
-            excedido
+            excedido,
+            periodo: 'MENSUAL'
+          };
+        })
+      );
+
+      // Procesar presupuestos anuales (gastos de todo el año)
+      const resumenAnual = await Promise.all(
+        presupuestosAnuales.map(async (presupuesto) => {
+          const totalGastado = await TransactionModel.getTotalGastosByCategory(
+            usuarioId,
+            presupuesto.categoria,
+            null, // Sin mes específico para calcular todo el año
+            anio
+          );
+
+          const porcentajeUsado = (totalGastado / presupuesto.monto) * 100;
+          const excedido = totalGastado > presupuesto.monto;
+
+          return {
+            id: presupuesto.id,
+            categoria: presupuesto.categoria,
+            presupuesto: presupuesto.monto,
+            gastado: totalGastado,
+            restante: presupuesto.monto - totalGastado,
+            porcentajeUsado,
+            excedido,
+            periodo: 'ANUAL'
           };
         })
       );
 
       return {
         success: true,
-        resumen
+        resumen: [...resumenMensual, ...resumenAnual],
+        resumenMensual,
+        resumenAnual
       };
     } catch (error) {
       console.error('Error al obtener resumen de presupuestos:', error);

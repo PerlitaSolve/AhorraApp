@@ -216,7 +216,6 @@ export default function Ingresos({ navigation, volver }) {
         </TouchableOpacity>
 
         <View style={styles.navButtons}>
-          <Button title="Ir a Gastos" onPress={() => navigation.navigate('Gastos')} />
           <Button title="Ir a Comparación" onPress={() => navigation.navigate('Comparacion')} />
         </View>
       </ScrollView>

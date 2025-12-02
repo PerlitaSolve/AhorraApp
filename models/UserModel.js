@@ -1,14 +1,14 @@
 import { getDatabase } from '../services/database';
 
-/**
- * Modelo de Usuario - Capa de acceso a datos
- * Responsabilidad: Operaciones CRUD directas con la base de datos
- */
+
+ // Modelo de Usuario - Capa de acceso a datos
+ // Responsabilidad: Operaciones CRUD directas con la base de datos
+ 
 
 class UserModel {
-  /**
-   * Crear un nuevo usuario en la base de datos
-   */
+  
+   // Crear un nuevo usuario en la base de datos
+   
   static async create(nombre, email, password, telefono) {
     const db = await getDatabase();
     const result = await db.runAsync(
@@ -18,9 +18,8 @@ class UserModel {
     return result.lastInsertRowId;
   }
 
-  /**
-   * Buscar usuario por email
-   */
+  // Buscar usuario por email
+  
   static async findByEmail(email) {
     const db = await getDatabase();
     const usuario = await db.getFirstAsync(
@@ -30,9 +29,8 @@ class UserModel {
     return usuario;
   }
 
-  /**
-   * Buscar usuario por ID
-   */
+  // Buscar usuario por ID
+  
   static async findById(id) {
     const db = await getDatabase();
     const usuario = await db.getFirstAsync(
@@ -42,9 +40,8 @@ class UserModel {
     return usuario;
   }
 
-  /**
-   * Buscar usuario por email y password
-   */
+  // Buscar usuario por email y password
+  
   static async findByCredentials(email, password) {
     const db = await getDatabase();
     const usuario = await db.getFirstAsync(
@@ -54,9 +51,8 @@ class UserModel {
     return usuario;
   }
 
-  /**
-   * Actualizar contraseña de un usuario
-   */
+  // Actualizar contraseña de un usuario
+  
   static async updatePassword(email, nuevaPassword) {
     const db = await getDatabase();
     const result = await db.runAsync(
@@ -66,9 +62,8 @@ class UserModel {
     return result.changes > 0;
   }
 
-  /**
-   * Actualizar información del usuario
-   */
+  // Actualizar información del usuario
+  
   static async update(id, datos) {
     const db = await getDatabase();
     const { nombre, email, telefono } = datos;

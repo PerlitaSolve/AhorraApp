@@ -1,7 +1,7 @@
-/**
- * Índice de Modelos
- * Exporta todos los modelos de la aplicación
- */
+
+ //Índice de Modelos
+ // Exporta todos los modelos de la aplicación
+ 
 
 export { default as UserModel } from './UserModel';
 export { default as TransactionModel } from './TransactionModel';

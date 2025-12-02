@@ -49,14 +49,14 @@ export default function EditarTrans({ volver, usuarioId, transaccion, onTransacc
     setLoading(true);
 
     try {
-      const datosActualizados = {
+      const resultado = await actualizarTransaccion(
+        transaccion.id,
         tipo,
-        monto: parseFloat(monto),
+        parseFloat(monto),
         categoria,
-        descripcion
-      };
-
-      const resultado = await actualizarTransaccion(transaccion.id, usuarioId, datosActualizados);
+        descripcion,
+        transaccion.fecha
+      );
 
       if (resultado.success) {
         Alert.alert('Éxito', 'Transacción actualizada correctamente');

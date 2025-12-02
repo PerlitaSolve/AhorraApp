@@ -13,7 +13,7 @@ export default function MenuLateral({volver }) {
 
   const menuItems = [
         { name: 'Transacciones', icon: 'repeat', screen: 'Transacciones' },
-        { name: 'Presupuesto', icon: 'currency-usd', screen: 'Presupuesto2' },
+        { name: 'Comparacion', icon: 'chart-bar', screen: 'Comparacion' },
         { name: 'Notificaciones', icon: 'bell', screen: 'Notificaciones' },
   ];
 
